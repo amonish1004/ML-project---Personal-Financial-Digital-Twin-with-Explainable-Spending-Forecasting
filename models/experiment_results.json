@@ -1,0 +1,88 @@
+{
+  "dataset_path": "data\\processed\\supervised_spending_dataset.csv",
+  "predictor_features": [
+    "spending_t",
+    "spending_t_minus_1",
+    "spending_t_minus_2",
+    "spending_3m_mean",
+    "spending_3m_std",
+    "debit_count_t",
+    "income_credit_t",
+    "ending_balance_t",
+    "spending_hh_t",
+    "spending_st_t",
+    "spending_in_t",
+    "spending_lo_t",
+    "spending_io_t",
+    "spending_other_t"
+  ],
+  "target_column": "next_month_total_spending",
+  "split_metadata": {
+    "total_samples": 171194,
+    "train_samples": 71824,
+    "val_samples": 45980,
+    "test_samples": 53390,
+    "train_accounts": 3252,
+    "val_accounts": 4289,
+    "test_accounts": 4487,
+    "train_period": "2013-04 to 2016-12",
+    "val_period": "2017-01 to 2017-12",
+    "test_period": "2018-01 to 2018-12"
+  },
+  "hyperparameters": {
+    "ridge": {
+      "alpha": 1.0,
+      "random_state": 42
+    },
+    "catboost": {
+      "iterations": 300,
+      "learning_rate": 0.05,
+      "depth": 6,
+      "random_seed": 42
+    }
+  },
+  "metrics": {
+    "persistence_baseline": {
+      "validation": {
+        "MAE": 934.2748,
+        "RMSE": 1820.082,
+        "R2": 0.0215,
+        "MedAE": 396.0
+      },
+      "test": {
+        "MAE": 996.5063,
+        "RMSE": 1918.8715,
+        "R2": -0.0643,
+        "MedAE": 418.54
+      }
+    },
+    "ridge_regression": {
+      "validation": {
+        "MAE": 763.9855,
+        "RMSE": 1323.342,
+        "R2": 0.4827,
+        "MedAE": 444.2815
+      },
+      "test": {
+        "MAE": 867.2796,
+        "RMSE": 1425.3726,
+        "R2": 0.4127,
+        "MedAE": 524.3646
+      }
+    },
+    "catboost_regressor": {
+      "validation": {
+        "MAE": 679.1074,
+        "RMSE": 1256.1675,
+        "R2": 0.5339,
+        "MedAE": 348.8922
+      },
+      "test": {
+        "MAE": 751.3405,
+        "RMSE": 1337.414,
+        "R2": 0.483,
+        "MedAE": 402.7515
+      }
+    }
+  }
+}

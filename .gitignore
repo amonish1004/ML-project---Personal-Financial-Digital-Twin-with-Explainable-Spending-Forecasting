@@ -3,3 +3,14 @@ __pycache__/
 *.pyc
 .env
 *.db
+
+# CatBoost generated training logs
+catboost_info/
+
+# Large dataset files
+data/raw/
+data/processed/*.csv
+data/processed/*.parquet
+
+# Trained model binaries
+models/*.joblib
