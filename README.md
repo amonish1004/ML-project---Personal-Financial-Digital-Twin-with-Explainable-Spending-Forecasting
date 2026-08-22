@@ -6,10 +6,12 @@ An academic machine learning project developing a **Personal Financial Digital T
 
 ## Project Status
 
-**Review 1 is COMPLETE** across all three core evaluation dimensions:
+**Review 1 & Dimension 4 are COMPLETE**:
 - **Dimension 1 (Problem & Dataset):** Complete
 - **Dimension 2 (Data Preprocessing & EDA):** Complete
 - **Dimension 3 (ML Implementation & Evaluation):** Complete
+- **Dimension 4 (Model Evaluation Audit & Performance Diagnostics):** Complete
+
 
 The project is now moving beyond Review 1 toward model explainability and digital twin interface development.
 
@@ -131,6 +133,7 @@ Personal Financial Digital Twin/
     ├── dimension1_dataset_validation.md
     ├── dimension2_preprocessing_and_eda.md
     ├── dimension3_ml_implementation.md
+    ├── dimension4_model_evaluation.md
     └── supervised_dataset_validation.md
 ```
 
@@ -156,7 +159,7 @@ python scripts/build_supervised_dataset.py
 # 3. Generate EDA statistics & figures
 python scripts/run_eda.py
 
-# 4. Train, evaluate, & serialize ML models
+# 4. Train, evaluate, & serialize ML models (Dimensions 3 & 4)
 python scripts/train_evaluate_models.py
 ```
 
@@ -184,3 +187,4 @@ For comprehensive technical reports, refer to:
 - [reports/dimension1_dataset_validation.md](reports/dimension1_dataset_validation.md)
 - [reports/dimension2_preprocessing_and_eda.md](reports/dimension2_preprocessing_and_eda.md)
 - [reports/dimension3_ml_implementation.md](reports/dimension3_ml_implementation.md)
+- [reports/dimension4_model_evaluation.md](reports/dimension4_model_evaluation.md)

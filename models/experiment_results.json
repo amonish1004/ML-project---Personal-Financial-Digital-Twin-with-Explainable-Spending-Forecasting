@@ -70,7 +70,7 @@
         "MedAE": 524.3646
       }
     },
-    "catboost_regressor": {
+    "catboost_regressor_train_only": {
       "validation": {
         "MAE": 679.1074,
         "RMSE": 1256.1675,
@@ -83,6 +83,46 @@
         "R2": 0.483,
         "MedAE": 402.7515
       }
+    },
+    "catboost_regressor_final_retrained": {
+      "test": {
+        "MAE": 729.878,
+        "RMSE": 1321.2714,
+        "R2": 0.4954,
+        "MedAE": 377.1682
+      }
+    }
+  },
+  "error_diagnostics_final_test": {
+    "mean_residual": 60.9433,
+    "std_residual": 1319.8652,
+    "pct_within_100": 14.87,
+    "pct_within_250": 37.0,
+    "pct_within_500": 59.55,
+    "pct_within_1000": 79.77
+  },
+  "segmented_metrics_final_test": {
+    "thresholds": {
+      "T1_33pct_CZK": 620.0,
+      "T2_67pct_CZK": 1753.96
+    },
+    "low_spending": {
+      "MAE": 382.1554,
+      "RMSE": 658.0588,
+      "R2": -15.0692,
+      "MedAE": 215.0454
+    },
+    "medium_spending": {
+      "MAE": 586.1832,
+      "RMSE": 892.3331,
+      "R2": -6.3184,
+      "MedAE": 395.1377
+    },
+    "high_spending": {
+      "MAE": 1244.7334,
+      "RMSE": 2028.9215,
+      "R2": 0.1734,
+      "MedAE": 711.6375
     }
   }
 }

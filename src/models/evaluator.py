@@ -54,6 +54,59 @@ def calculate_regression_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> Dict
     }
 
 
+def calculate_error_distribution(y_true: np.ndarray, y_pred: np.ndarray) -> Dict[str, float]:
+    """
+    Computes residual distribution diagnostics and error tolerance percentages:
+    - Mean Residual (Bias)
+    - Residual Std
+    - Percentage of predictions within ±100, ±250, ±500, ±1000 CZK
+    """
+    residuals = y_pred - y_true
+    abs_errors = np.abs(residuals)
+    total = len(y_true)
+
+    return {
+        "mean_residual": round(float(np.mean(residuals)), 4),
+        "std_residual": round(float(np.std(residuals)), 4),
+        "pct_within_100": round(float(np.sum(abs_errors <= 100.0) / total * 100.0), 2),
+        "pct_within_250": round(float(np.sum(abs_errors <= 250.0) / total * 100.0), 2),
+        "pct_within_500": round(float(np.sum(abs_errors <= 500.0) / total * 100.0), 2),
+        "pct_within_1000": round(float(np.sum(abs_errors <= 1000.0) / total * 100.0), 2),
+    }
+
+
+def calculate_segmented_metrics(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    y_train_reference: np.ndarray
+) -> Dict[str, Any]:
+    """
+    Evaluates regression metrics across spending tertiles (Low, Medium, High).
+    
+    Leakage-Safe Method:
+    Quantile cutoffs (T1 = 33.3rd percentile, T2 = 66.7th percentile) are calculated
+    strictly on the training target array (y_train_reference) and applied frozen to the evaluation partition.
+    """
+    t1_threshold = float(np.percentile(y_train_reference, 33.333))
+    t2_threshold = float(np.percentile(y_train_reference, 66.667))
+
+    mask_low = y_true <= t1_threshold
+    mask_med = (y_true > t1_threshold) & (y_true <= t2_threshold)
+    mask_high = y_true > t2_threshold
+
+    results = {
+        "thresholds": {
+            "T1_33pct_CZK": round(t1_threshold, 2),
+            "T2_67pct_CZK": round(t2_threshold, 2),
+        },
+        "low_spending": calculate_regression_metrics(y_true[mask_low], y_pred[mask_low]),
+        "medium_spending": calculate_regression_metrics(y_true[mask_med], y_pred[mask_med]),
+        "high_spending": calculate_regression_metrics(y_true[mask_high], y_pred[mask_high]),
+    }
+    return results
+
+
+
 def load_and_split_dataset(csv_path: Path) -> Dict[str, Any]:
     """
     Loads the supervised dataset and performs a strict out-of-time temporal partition based on target_month.
