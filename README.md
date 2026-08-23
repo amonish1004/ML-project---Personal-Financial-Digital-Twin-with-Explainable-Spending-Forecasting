@@ -1,20 +1,32 @@
 # Personal Financial Digital Twin with Explainable Spending Forecasting
 
-An academic machine learning project developing a **Personal Financial Digital Twin** to model account-level transaction behavior and forecast next-month outgoing debit expenditure.
+An academic machine learning and software engineering project developing a **Personal Financial Digital Twin** to model account-level transaction behavior and forecast next-month outgoing debit expenditure with explainable post-hoc attributions and counterfactual what-if simulation.
 
 ---
 
-## Project Status
+## Project Dimensions & Development Progress
 
-**Review 1, Dimension 4 & Dimension 5 are COMPLETE**:
-- **Dimension 1 (Problem & Dataset):** Complete
-- **Dimension 2 (Data Preprocessing & EDA):** Complete
-- **Dimension 3 (ML Implementation & Evaluation):** Complete
-- **Dimension 4 (Model Evaluation Audit & Performance Diagnostics):** Complete
-- **Dimension 5 (Explainability & Feature Attribution Analysis):** Complete
+The project is structured into two distinct execution phases:
+- **Dimensions 1–5**: Core Academic ML & Research Pipeline (**COMPLETE**)
+- **Dimensions 6–13**: Application Engineering & Digital Twin Deployment Layer (**IN PROGRESS**)
 
+### Overall Dimension Status Summary
 
-The project has completed post-hoc model explainability via TreeSHAP and is now moving toward digital twin simulation logic and web interface development.
+| Dimension | Description | Stage / Layer | Status |
+| :---: | :--- | :--- | :---: |
+| **Dimension 1** | Problem Formulation & Czech Bank Dataset Validation | Core ML Pipeline | ✅ **COMPLETE** |
+| **Dimension 2** | Data Preprocessing, Aggregation & EDA | Core ML Pipeline | ✅ **COMPLETE** |
+| **Dimension 3** | ML Model Implementation & Chronological Partitioning | Core ML Pipeline | ✅ **COMPLETE** |
+| **Dimension 4** | Model Evaluation Audit & Performance Diagnostics | Core ML Pipeline | ✅ **COMPLETE** |
+| **Dimension 5** | Model Explainability & Feature Attribution (TreeSHAP) | Core ML Pipeline | ✅ **COMPLETE** |
+| **Dimension 6** | Digital Twin Application Architecture & Contract | Application Layer | ✅ **COMPLETE** |
+| **Dimension 7** | Reusable Model Inference Gateway & Validation | Application Layer | ✅ **COMPLETE** |
+| **Dimension 8** | What-If Scenario Simulator Engine | Application Layer | ⏳ **NEXT** |
+| **Dimension 9** | Individual Real-Time SHAP Explanation Service | Application Layer | ⏳ **PLANNED** |
+| **Dimension 10** | REST API Backend Application | Application Layer | ⏳ **PLANNED** |
+| **Dimension 11** | Interactive Web Frontend Interface | Application Layer | ⏳ **PLANNED** |
+| **Dimension 12** | System Integration & Counterfactual Visualization | Application Layer | ⏳ **PLANNED** |
+| **Dimension 13** | End-to-End System Testing & Validation | Application Layer | ⏳ **PLANNED** |
 
 ---
 
@@ -41,25 +53,40 @@ The project utilizes the **PKDD '99 Czech Bank Dataset** (Berka Dataset) stored 
 
 ### Pipeline Flow
 ```text
-Raw Berka TSVs ➔ Preprocessing ➔ Monthly Account Panel ➔ Feature Engineering ➔ Supervised Dataset ➔ Chronological Split ➔ Baseline + Ridge + CatBoost ➔ Evaluation ➔ SHAP Explainability
+Raw Berka TSVs ➔ Preprocessing ➔ Monthly Account Panel ➔ Feature Engineering ➔ Supervised Dataset ➔ Chronological Split ➔ Baseline + Ridge + CatBoost ➔ Evaluation ➔ SHAP Explainability ➔ Reusable Inference Gateway
 ```
 
 Dimension 2 completed raw data cleaning, monthly aggregation, leakage-safe dataset construction, and EDA. The final supervised dataset ([data/processed/supervised_spending_dataset.csv](data/processed/supervised_spending_dataset.csv)) contains **171,194 samples** across **4,500 accounts** with zero null values.
 
-### Approved Predictor Features ($X_{u, t}$)
-14 historical predictor features constructed strictly on or before month $t$:
-- **Lag Spending:** `spending_t`, `spending_t_minus_1`, `spending_t_minus_2`
-- **Rolling Volatility:** `spending_3m_mean`, `spending_3m_std`
-- **Activity & Balance:** `debit_count_t`, `income_credit_t`, `ending_balance_t`
-- **Category Breakdown:** `spending_hh_t` (household), `spending_st_t` (fees), `spending_in_t` (insurance), `spending_lo_t` (loans), `spending_io_t` (interest), `spending_other_t` (uncategorized)
+### Authoritative Predictor Feature Contract ($X_{u, t}$)
+The model strictly requires exactly 14 historical predictor features constructed on or before month $t$:
 
-*Note: `account_id`, `reference_month`, `target_month`, and `next_month_total_spending` are explicitly excluded from predictor matrix $X$.*
+```python
+EXACT_14_FEATURE_ORDER = [
+    "spending_t",          # Order 1:  Current month total debit spending (derived)
+    "spending_t_minus_1",  # Order 2:  Month t-1 debit spending lag
+    "spending_t_minus_2",  # Order 3:  Month t-2 debit spending lag
+    "spending_3m_mean",    # Order 4:  3-month rolling mean spending (derived)
+    "spending_3m_std",     # Order 5:  3-month rolling std spending (derived, ddof=0)
+    "debit_count_t",       # Order 6:  Debit transaction count
+    "income_credit_t",     # Order 7:  Credit income inflow
+    "ending_balance_t",    # Order 8:  Ending liquid balance
+    "spending_hh_t",       # Order 9:  Household debit subtotal
+    "spending_st_t",       # Order 10: Statement/fee debit subtotal
+    "spending_in_t",       # Order 11: Insurance debit subtotal
+    "spending_lo_t",       # Order 12: Loan repayment debit subtotal
+    "spending_io_t",       # Order 13: Interest outflow debit subtotal
+    "spending_other_t"     # Order 14: Uncategorized debit subtotal
+]
+```
+
+*Note: `account_id`, `reference_month`, `target_month`, and `next_month_total_spending` are metadata/targets and are strictly excluded from predictor matrix $X$.*
 
 ---
 
-## ML Implementation & Empirical Results (Dimension 3 & 4)
+## ML Implementation & Authoritative Model Results (Dimension 3 & 4)
 
-Dimension 3 implementation is complete and empirically validated.
+Dimension 3 & 4 implementation is complete and empirically validated.
 
 ### Out-of-Time Dataset Partitioning
 Data is partitioned strictly **chronologically (out-of-time)** without random shuffling:
@@ -79,13 +106,15 @@ Models were trained on **TRAIN** and evaluated on **VALIDATION** for model selec
 
 - **Selection Rationale:** **CatBoost Regressor** was selected based strictly on Validation set performance ($R^2 = 0.5339$).
 
-### Final Test Results
+### Final Test Results (Frozen Champion Model)
 The selected CatBoost model was retrained on combined **Train + Validation** data (`2013-04` through `2017-12`) and evaluated once on the held-out **2018 Test Partition**:
 
 | Model / Retraining Strategy | Test MAE (CZK) | Test RMSE (CZK) | Test R² | Test MedAE (CZK) |
 | :--- | ---: | ---: | ---: | ---: |
 | **Naive Persistence Baseline** | 996.51 | 1918.87 | -0.0643 | 418.54 |
-| **Final CatBoost (Train + Val Retrained)** | **729.88** | **1321.27** | **0.4954** | **377.17** |
+| **Final CatBoost (`models/catboost_model.joblib`)** | **729.88** | **1321.27** | **0.4954** | **377.17** |
+
+- **Model Preservation**: [`models/catboost_model.joblib`](file:///d:/College%20UG/3rd%20year/5TH%20SEM/Machine%20Learning/ML%20project/Personal%20Financial%20Digital%20Twin/models/catboost_model.joblib) remains the authoritative frozen champion model artifact. No retraining occurred during application engineering.
 
 ---
 
@@ -102,13 +131,31 @@ Dimension 5 evaluated exact TreeSHAP attributions across all 53,390 samples in t
 
 ---
 
-## Methodology Status
+## Dimension 6 — Digital Twin Application Architecture
 
-The project aligns with the recommended **CatBoost + Time-Series Evaluation + SHAP Explainability** framework:
+Dimension 6 established the formal transition from offline ML modeling to online application engineering:
+- **Architecture Specification Artifact**: See [docs/digital_twin_architecture.md](docs/digital_twin_architecture.md).
+- **ML vs. Application Boundary**: Defined strict isolation ensuring the online web application consumes the frozen [`models/catboost_model.joblib`](file:///d:/College%20UG/3rd%20year/5TH%20SEM/Machine%20Learning/ML%20project/Personal%20Financial%20Digital%20Twin/models/catboost_model.joblib) without retraining or modifying training code.
+- **Mathematical Feature Integrity**: Documented that `spending_3m_std` MUST explicitly use `ddof=0` ($\text{std} = \sqrt{\frac{1}{3}\sum (S_k - \mu)^2}$) to match the exact training feature generation.
+- **Input Editability & Derivation Rules**: Classified features into directly user-editable state inputs (`ending_balance_t`, `income_credit_t`, `debit_count_t`), category debit inputs (`spending_hh_t`..`spending_other_t`), historical lags (`spending_t_minus_1`, `spending_t_minus_2`), and auto-derived features (`spending_t`, `spending_3m_mean`, `spending_3m_std`).
+- **Non-Causal Model Attribution Paradigm**: Framed what-if simulations as model-attribution counterfactuals (*"Under the trained model, changing this input produces a different spending prediction"*), avoiding invalid real-world causal claims.
 
-- [x] **CatBoost Regressor:** **IMPLEMENTED** (`models/catboost_model.joblib`)
-- [x] **Time-Series / Out-of-Time Evaluation:** **IMPLEMENTED** (Strict chronological partitioning)
-- [x] **SHAP Explainability:** **IMPLEMENTED** (`reports/dimension5_explainability.md`)
+---
+
+## Dimension 7 — Reusable Model Inference Layer
+
+Dimension 7 implemented and verified the single, reusable prediction gateway for the digital twin application:
+- **Application Services Package**: [`src/app/`](file:///d:/College%20UG/3rd%20year/5TH%20SEM/Machine%20Learning/ML%20project/Personal%20Financial%20Digital%20Twin/src/app/)
+  - [`src/app/schema.py`](file:///d:/College%20UG/3rd%20year/5TH%20SEM/Machine%20Learning/ML%20project/Personal%20Financial%20Digital%20Twin/src/app/schema.py): Input representation (`FinancialState`), validation rules, and feature derivation (`ddof=0` std, 3M mean, category spending summation).
+  - [`src/app/inference.py`](file:///d:/College%20UG/3rd%20year/5TH%20SEM/Machine%20Learning/ML%20project/Personal%20Financial%20Digital%20Twin/src/app/inference.py): Primary reusable gateway function `predict_spending()`, singleton model caching, and exact 14-column sequence enforcement.
+- **Verified Test Suite**: Executed [`python tests/test_inference.py`](file:///d:/College%20UG/3rd%20year/5TH%20SEM/Machine%20Learning/ML%20project/Personal%20Financial%20Digital%20Twin/tests/test_inference.py) (**All 7 Tests Passed**):
+  1. Model loading — **PASS**
+  2. Feature contract & 14-column sequence — **PASS**
+  3. Feature derivation & `ddof=0` mathematical fidelity — **PASS**
+  4. Prediction execution & finiteness — **PASS**
+  5. Invalid input rejection (NaN, infinity, non-numeric, negative counts) — **PASS**
+  6. Determinism & repeatability — **PASS**
+  7. Direct CatBoost prediction consistency — **PASS** (Gateway `231.73 CZK` == Direct CatBoost `231.73 CZK`, Difference = `0.000000`).
 
 ---
 
@@ -124,23 +171,31 @@ Personal Financial Digital Twin/
 │   └── processed/
 │       ├── account_monthly_panel.csv
 │       └── supervised_spending_dataset.csv
+├── docs/
+│   └── digital_twin_architecture.md     <-- Dimension 6 Architecture Contract
+├── models/
+│   ├── catboost_model.joblib             <-- Frozen Authoritative Champion Model
+│   ├── ridge_pipeline.joblib
+│   ├── experiment_results.json
+│   └── shap_summary_results.json
 ├── src/
 │   ├── config.py
-│   ├── data/
-│   ├── features/
-│   └── models/
-│       └── explainability.py
+│   ├── data/                             <-- Core ML Pipeline (Read-Only)
+│   ├── features/                         <-- Core ML Pipeline (Read-Only)
+│   ├── models/                           <-- Core ML Pipeline (Read-Only)
+│   │   └── explainability.py
+│   └── app/                              <-- Application Layer Package (Dimension 7+)
+│       ├── __init__.py
+│       ├── schema.py                     <-- FinancialState & Derivation Engine
+│       └── inference.py                  <-- Reusable Prediction Gateway (predict_spending)
+├── tests/
+│   └── test_inference.py                 <-- Inference Layer Test Suite (7/7 Passed)
 ├── scripts/
 │   ├── run_preprocessing.py
 │   ├── build_supervised_dataset.py
 │   ├── run_eda.py
 │   ├── train_evaluate_models.py
 │   └── generate_shap_explanations.py
-├── models/
-│   ├── catboost_model.joblib
-│   ├── ridge_pipeline.joblib
-│   ├── experiment_results.json
-│   └── shap_summary_results.json
 └── reports/
     ├── figures/
     │   └── shap/
@@ -163,7 +218,7 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### Run Pipeline Scripts
+### Run ML Pipeline & Verification Scripts
 ```powershell
 # 1. Preprocess raw data & build monthly panel
 python scripts/run_preprocessing.py
@@ -179,6 +234,9 @@ python scripts/train_evaluate_models.py
 
 # 5. Calculate TreeSHAP attributions & render explainability plots (Dimension 5)
 python scripts/generate_shap_explanations.py
+
+# 6. Run Inference Layer Verification Test Suite (Dimension 7)
+python tests/test_inference.py
 ```
 
 ---
@@ -187,28 +245,29 @@ python scripts/generate_shap_explanations.py
 
 - **Upper-Tail Outliers:** Non-recurring spending debits drive higher RMSE metrics relative to MedAE (CatBoost Test MedAE: 377.17 CZK vs MAE: 729.88 CZK, RMSE: 1321.27 CZK).
 - **Unexplained Variance:** $R^2 \approx 0.50$ reflects inherent stochastic variance in individual financial spending behavior.
-- **Observational Correlation:** SHAP values measure model attributions based on observed historical patterns, not causal interventions.
+- **Observational Correlation:** SHAP values and digital twin counterfactuals measure model attributions based on observed historical patterns, not causal interventions.
 - **Academic Scope:** Designed as an academic financial digital twin simulation; does not provide real-world credit scoring or financial advice.
 
 ---
 
-## Future Work
+## Future Development Roadmap
 
-The following project phases remain to be completed:
-- **Financial Behavior & Digital Twin Simulation Logic**: Formulate scenario rule engine for what-if balance / income adjustments.
-- **What-If Scenario Simulation Engine**: Integrate CatBoost model + SHAP attributions into interactive counterfactual simulations.
-- **Web Interface / Dashboard**: Build dynamic web UI for spending forecasting and scenario exploration.
-- **Model + SHAP + Simulator Integration**: Connect frontend user controls to backend model inference and SHAP explanations.
-- **End-to-End Testing & Verification**: Validate UI interactions and API stability.
-- **Engineering Cleanup & Viva/Demo Prep**: Final repository cleanup and presentation preparation.
+The upcoming application engineering dimensions include:
+- **Dimension 8 — What-If Simulator Engine**: Build scenario comparison engine computing baseline vs. counterfactual prediction deltas $\Delta \hat{Y}$.
+- **Dimension 9 — Individual Real-Time SHAP Explanation Service**: Create real-time single-instance Shapley attribution service for interactive user waterfall charts.
+- **Dimension 10 — REST API Backend Application**: Develop lightweight Web API endpoints (`/api/predict`, `/api/explain`, `/api/simulate`).
+- **Dimension 11 — Interactive Web Frontend Interface**: Develop browser-based dashboard with financial state sliders and real-time visualization.
+- **Dimension 12 — System Integration & Counterfactual Visualization**: Connect frontend user controls to backend inference, simulation, and SHAP services.
+- **Dimension 13 — End-to-End System Testing & Validation**: Validate complete web application performance, user interactions, and edge-case behavior.
 
 ---
 
 ## Technical Documentation & References
 
-For comprehensive technical reports, refer to:
+For comprehensive technical documentation, refer to:
 - [reports/dimension1_dataset_validation.md](reports/dimension1_dataset_validation.md)
 - [reports/dimension2_preprocessing_and_eda.md](reports/dimension2_preprocessing_and_eda.md)
 - [reports/dimension3_ml_implementation.md](reports/dimension3_ml_implementation.md)
 - [reports/dimension4_model_evaluation.md](reports/dimension4_model_evaluation.md)
 - [reports/dimension5_explainability.md](reports/dimension5_explainability.md)
+- [docs/digital_twin_architecture.md](docs/digital_twin_architecture.md)
