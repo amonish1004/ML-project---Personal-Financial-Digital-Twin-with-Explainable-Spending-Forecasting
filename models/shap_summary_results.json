@@ -1,0 +1,218 @@
+{
+  "dataset_evaluated": "TEST partition (2018-01 through 2018-12)",
+  "num_test_samples": 53390,
+  "num_predictor_features": 14,
+  "expected_value_base_spending_CZK": 1612.1063,
+  "computation_time_seconds": 1.9734,
+  "feature_importance_ranking": [
+    {
+      "feature": "ending_balance_t",
+      "mean_abs_shap": 437.69085946680957,
+      "mean_shap": 72.78537012383715,
+      "std_shap": 652.0094733854679,
+      "rank": 1
+    },
+    {
+      "feature": "income_credit_t",
+      "mean_abs_shap": 386.17037895490415,
+      "mean_shap": -2.6916352490199356,
+      "std_shap": 530.9442339012069,
+      "rank": 2
+    },
+    {
+      "feature": "spending_3m_mean",
+      "mean_abs_shap": 239.47371125782107,
+      "mean_shap": 3.2753077526166186,
+      "std_shap": 326.5228478586612,
+      "rank": 3
+    },
+    {
+      "feature": "spending_t",
+      "mean_abs_shap": 132.8945454326178,
+      "mean_shap": 3.334451676886898,
+      "std_shap": 150.98115459295855,
+      "rank": 4
+    },
+    {
+      "feature": "spending_t_minus_1",
+      "mean_abs_shap": 109.3653356357634,
+      "mean_shap": 8.006759826326363,
+      "std_shap": 130.19720841094912,
+      "rank": 5
+    },
+    {
+      "feature": "spending_3m_std",
+      "mean_abs_shap": 61.18428285297223,
+      "mean_shap": -7.307072467836168,
+      "std_shap": 80.49641497268166,
+      "rank": 6
+    },
+    {
+      "feature": "spending_hh_t",
+      "mean_abs_shap": 45.7228872325072,
+      "mean_shap": 2.891065558750914,
+      "std_shap": 69.43334515488284,
+      "rank": 7
+    },
+    {
+      "feature": "spending_other_t",
+      "mean_abs_shap": 43.6186659757159,
+      "mean_shap": -1.214510060092841,
+      "std_shap": 52.74793836303016,
+      "rank": 8
+    },
+    {
+      "feature": "debit_count_t",
+      "mean_abs_shap": 40.35297991333498,
+      "mean_shap": -6.0828054588923015,
+      "std_shap": 91.87344058296509,
+      "rank": 9
+    },
+    {
+      "feature": "spending_t_minus_2",
+      "mean_abs_shap": 30.080797057712086,
+      "mean_shap": -0.40309549517327353,
+      "std_shap": 41.73862377061312,
+      "rank": 10
+    },
+    {
+      "feature": "spending_st_t",
+      "mean_abs_shap": 17.612414567140075,
+      "mean_shap": -5.753975938724469,
+      "std_shap": 27.804936884383217,
+      "rank": 11
+    },
+    {
+      "feature": "spending_lo_t",
+      "mean_abs_shap": 12.27189653799825,
+      "mean_shap": 1.846055872104124,
+      "std_shap": 29.257469947631296,
+      "rank": 12
+    },
+    {
+      "feature": "spending_in_t",
+      "mean_abs_shap": 8.094594904329888,
+      "mean_shap": -0.2264186579785423,
+      "std_shap": 16.173795040135836,
+      "rank": 13
+    },
+    {
+      "feature": "spending_io_t",
+      "mean_abs_shap": 0.43133207699527143,
+      "mean_shap": 0.1650943499388109,
+      "std_shap": 4.1077639808656,
+      "rank": 14
+    }
+  ],
+  "top_3_features": [
+    "ending_balance_t",
+    "income_credit_t",
+    "spending_3m_mean"
+  ],
+  "archetype_explanations": {
+    "typical_median_spender": {
+      "label": "Typical / Median Spender",
+      "sample_index": 5478,
+      "account_id": 487,
+      "reference_month": "2017-12",
+      "target_month": "2018-01",
+      "actual_spending_y": 1069.86,
+      "predicted_spending_y_hat": 1023.7,
+      "residual_y_hat_minus_y": -46.16,
+      "feature_values": {
+        "spending_t": 1069.86,
+        "spending_t_minus_1": 1.46,
+        "spending_t_minus_2": 1.46,
+        "spending_3m_mean": 357.5933333333333,
+        "spending_3m_std": 503.64859001313823,
+        "debit_count_t": 2.0,
+        "income_credit_t": 1360.97,
+        "ending_balance_t": 371.11,
+        "spending_hh_t": 1068.4,
+        "spending_st_t": 1.46,
+        "spending_in_t": 0.0,
+        "spending_lo_t": 0.0,
+        "spending_io_t": 0.0,
+        "spending_other_t": 0.0
+      }
+    },
+    "high_spender": {
+      "label": "High Spender",
+      "sample_index": 11612,
+      "account_id": 1029,
+      "reference_month": "2018-04",
+      "target_month": "2018-05",
+      "actual_spending_y": 26459.26,
+      "predicted_spending_y_hat": 5353.59,
+      "residual_y_hat_minus_y": -21105.67,
+      "feature_values": {
+        "spending_t": 1359.26,
+        "spending_t_minus_1": 6739.26,
+        "spending_t_minus_2": 2359.26,
+        "spending_3m_mean": 3485.9266666666667,
+        "spending_3m_std": 2336.39798740616,
+        "debit_count_t": 4.0,
+        "income_credit_t": 3686.5,
+        "ending_balance_t": 10083.69,
+        "spending_hh_t": 813.6,
+        "spending_st_t": 1.46,
+        "spending_in_t": 0.0,
+        "spending_lo_t": 0.0,
+        "spending_io_t": 0.0,
+        "spending_other_t": 544.2
+      }
+    },
+    "largest_under_prediction": {
+      "label": "Largest Under-Prediction (y_pred < y_true)",
+      "sample_index": 11612,
+      "account_id": 1029,
+      "reference_month": "2018-04",
+      "target_month": "2018-05",
+      "actual_spending_y": 26459.26,
+      "predicted_spending_y_hat": 5353.59,
+      "residual_y_hat_minus_y": -21105.67,
+      "feature_values": {
+        "spending_t": 1359.26,
+        "spending_t_minus_1": 6739.26,
+        "spending_t_minus_2": 2359.26,
+        "spending_3m_mean": 3485.9266666666667,
+        "spending_3m_std": 2336.39798740616,
+        "debit_count_t": 4.0,
+        "income_credit_t": 3686.5,
+        "ending_balance_t": 10083.69,
+        "spending_hh_t": 813.6,
+        "spending_st_t": 1.46,
+        "spending_in_t": 0.0,
+        "spending_lo_t": 0.0,
+        "spending_io_t": 0.0,
+        "spending_other_t": 544.2
+      }
+    },
+    "largest_over_prediction": {
+      "label": "Largest Over-Prediction (y_pred > y_true)",
+      "sample_index": 39552,
+      "account_id": 3516,
+      "reference_month": "2018-04",
+      "target_month": "2018-05",
+      "actual_spending_y": 3.0,
+      "predicted_spending_y_hat": 7090.46,
+      "residual_y_hat_minus_y": 7087.46,
+      "feature_values": {
+        "spending_t": 20503.0,
+        "spending_t_minus_1": 7853.0,
+        "spending_t_minus_2": 2310.0,
+        "spending_3m_mean": 10222.0,
+        "spending_3m_std": 7613.822211390719,
+        "debit_count_t": 6.0,
+        "income_credit_t": 16346.25,
+        "ending_balance_t": 11338.38,
+        "spending_hh_t": 0.0,
+        "spending_st_t": 3.0,
+        "spending_in_t": 0.0,
+        "spending_lo_t": 0.0,
+        "spending_io_t": 0.0,
+        "spending_other_t": 20500.0
+      }
+    }
+  }
+}

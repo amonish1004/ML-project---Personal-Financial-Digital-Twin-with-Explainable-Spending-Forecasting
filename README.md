@@ -6,14 +6,15 @@ An academic machine learning project developing a **Personal Financial Digital T
 
 ## Project Status
 
-**Review 1 & Dimension 4 are COMPLETE**:
+**Review 1, Dimension 4 & Dimension 5 are COMPLETE**:
 - **Dimension 1 (Problem & Dataset):** Complete
 - **Dimension 2 (Data Preprocessing & EDA):** Complete
 - **Dimension 3 (ML Implementation & Evaluation):** Complete
 - **Dimension 4 (Model Evaluation Audit & Performance Diagnostics):** Complete
+- **Dimension 5 (Explainability & Feature Attribution Analysis):** Complete
 
 
-The project is now moving beyond Review 1 toward model explainability and digital twin interface development.
+The project has completed post-hoc model explainability via TreeSHAP and is now moving toward digital twin simulation logic and web interface development.
 
 ---
 
@@ -40,7 +41,7 @@ The project utilizes the **PKDD '99 Czech Bank Dataset** (Berka Dataset) stored 
 
 ### Pipeline Flow
 ```text
-Raw Berka TSVs ➔ Preprocessing ➔ Monthly Account Panel ➔ Feature Engineering ➔ Supervised Dataset ➔ Chronological Split ➔ Baseline + Ridge + CatBoost ➔ Evaluation
+Raw Berka TSVs ➔ Preprocessing ➔ Monthly Account Panel ➔ Feature Engineering ➔ Supervised Dataset ➔ Chronological Split ➔ Baseline + Ridge + CatBoost ➔ Evaluation ➔ SHAP Explainability
 ```
 
 Dimension 2 completed raw data cleaning, monthly aggregation, leakage-safe dataset construction, and EDA. The final supervised dataset ([data/processed/supervised_spending_dataset.csv](data/processed/supervised_spending_dataset.csv)) contains **171,194 samples** across **4,500 accounts** with zero null values.
@@ -56,7 +57,7 @@ Dimension 2 completed raw data cleaning, monthly aggregation, leakage-safe datas
 
 ---
 
-## ML Implementation & Empirical Results (Dimension 3)
+## ML Implementation & Empirical Results (Dimension 3 & 4)
 
 Dimension 3 implementation is complete and empirically validated.
 
@@ -86,8 +87,18 @@ The selected CatBoost model was retrained on combined **Train + Validation** dat
 | **Naive Persistence Baseline** | 996.51 | 1918.87 | -0.0643 | 418.54 |
 | **Final CatBoost (Train + Val Retrained)** | **729.88** | **1321.27** | **0.4954** | **377.17** |
 
-- **Test Set Isolation:** Test data was **not** used for model selection or hyperparameter tuning.
-- **R² Interpretation:** An $R^2 \approx 0.50$ means CatBoost accounts for approximately half of the expenditure variance relative to a mean baseline.
+---
+
+## Dimension 5 — Model Explainability (TreeSHAP)
+
+Dimension 5 evaluated exact TreeSHAP attributions across all 53,390 samples in the 2018 test partition:
+- **Base Expected Value $E[f(X)]$**: $1,612.11\text{ CZK}$
+- **Top 3 Predictor Drivers**:
+  1. `ending_balance_t` (Mean $|SHAP| = 437.69\text{ CZK}$)
+  2. `income_credit_t` (Mean $|SHAP| = 386.17\text{ CZK}$)
+  3. `spending_3m_mean` (Mean $|SHAP| = 239.47\text{ CZK}$)
+- **Local Customer Archetypes**: Evaluated typical spender, high spender, largest under-prediction, and largest over-prediction cases via local waterfall plots.
+- **Detailed Academic Report**: See [reports/dimension5_explainability.md](reports/dimension5_explainability.md).
 
 ---
 
@@ -97,7 +108,7 @@ The project aligns with the recommended **CatBoost + Time-Series Evaluation + SH
 
 - [x] **CatBoost Regressor:** **IMPLEMENTED** (`models/catboost_model.joblib`)
 - [x] **Time-Series / Out-of-Time Evaluation:** **IMPLEMENTED** (Strict chronological partitioning)
-- [ ] **SHAP Explainability:** **NOT YET IMPLEMENTED** (Planned next stage)
+- [x] **SHAP Explainability:** **IMPLEMENTED** (`reports/dimension5_explainability.md`)
 
 ---
 
@@ -118,23 +129,27 @@ Personal Financial Digital Twin/
 │   ├── data/
 │   ├── features/
 │   └── models/
+│       └── explainability.py
 ├── scripts/
 │   ├── run_preprocessing.py
 │   ├── build_supervised_dataset.py
 │   ├── run_eda.py
-│   └── train_evaluate_models.py
+│   ├── train_evaluate_models.py
+│   └── generate_shap_explanations.py
 ├── models/
 │   ├── catboost_model.joblib
 │   ├── ridge_pipeline.joblib
-│   └── experiment_results.json
+│   ├── experiment_results.json
+│   └── shap_summary_results.json
 └── reports/
     ├── figures/
+    │   └── shap/
     ├── date_provenance_check.md
     ├── dimension1_dataset_validation.md
     ├── dimension2_preprocessing_and_eda.md
     ├── dimension3_ml_implementation.md
     ├── dimension4_model_evaluation.md
-    └── supervised_dataset_validation.md
+    └── dimension5_explainability.md
 ```
 
 ---
@@ -161,6 +176,9 @@ python scripts/run_eda.py
 
 # 4. Train, evaluate, & serialize ML models (Dimensions 3 & 4)
 python scripts/train_evaluate_models.py
+
+# 5. Calculate TreeSHAP attributions & render explainability plots (Dimension 5)
+python scripts/generate_shap_explanations.py
 ```
 
 ---
@@ -169,15 +187,20 @@ python scripts/train_evaluate_models.py
 
 - **Upper-Tail Outliers:** Non-recurring spending debits drive higher RMSE metrics relative to MedAE (CatBoost Test MedAE: 377.17 CZK vs MAE: 729.88 CZK, RMSE: 1321.27 CZK).
 - **Unexplained Variance:** $R^2 \approx 0.50$ reflects inherent stochastic variance in individual financial spending behavior.
+- **Observational Correlation:** SHAP values measure model attributions based on observed historical patterns, not causal interventions.
 - **Academic Scope:** Designed as an academic financial digital twin simulation; does not provide real-world credit scoring or financial advice.
 
 ---
 
 ## Future Work
 
-- **SHAP Explainability Integration:** Implement global feature summary plots and local force plots.
-- **Digital Twin Interface:** Develop an interactive web dashboard for spending forecasting and scenario simulation.
-- **Extended Feature Engineering:** Incorporate seasonal indicators and volatility ratio metrics.
+The following project phases remain to be completed:
+- **Financial Behavior & Digital Twin Simulation Logic**: Formulate scenario rule engine for what-if balance / income adjustments.
+- **What-If Scenario Simulation Engine**: Integrate CatBoost model + SHAP attributions into interactive counterfactual simulations.
+- **Web Interface / Dashboard**: Build dynamic web UI for spending forecasting and scenario exploration.
+- **Model + SHAP + Simulator Integration**: Connect frontend user controls to backend model inference and SHAP explanations.
+- **End-to-End Testing & Verification**: Validate UI interactions and API stability.
+- **Engineering Cleanup & Viva/Demo Prep**: Final repository cleanup and presentation preparation.
 
 ---
 
@@ -188,3 +211,4 @@ For comprehensive technical reports, refer to:
 - [reports/dimension2_preprocessing_and_eda.md](reports/dimension2_preprocessing_and_eda.md)
 - [reports/dimension3_ml_implementation.md](reports/dimension3_ml_implementation.md)
 - [reports/dimension4_model_evaluation.md](reports/dimension4_model_evaluation.md)
+- [reports/dimension5_explainability.md](reports/dimension5_explainability.md)
