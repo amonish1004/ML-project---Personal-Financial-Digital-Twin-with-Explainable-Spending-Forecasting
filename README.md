@@ -25,8 +25,8 @@ The project is structured into two distinct execution phases:
 | **Dimension 9** | Individual Real-Time SHAP Explanation Service | Application Layer | ✅ **COMPLETE** |
 | **Dimension 10** | REST API Backend Application | Application Layer | ✅ **COMPLETE** |
 | **Dimension 11** | Interactive Web Frontend Interface | Application Layer | ✅ **COMPLETE** |
-| **Dimension 12** | System Integration & Counterfactual Visualization | Application Layer | ⏳ **NEXT** |
-| **Dimension 13** | End-to-End System Testing & Validation | Application Layer | ⏳ **PLANNED** |
+| **Dimension 12** | System Integration & Counterfactual Visualization | Application Layer | ✅ **COMPLETE** |
+| **Dimension 13** | End-to-End System Testing & Validation | Application Layer | ✅ **COMPLETE** |
 
 ---
 
@@ -261,6 +261,43 @@ Dimension 11 implemented and verified the browser-based dashboard interface:
 
 ---
 
+## Dimension 12 — System Integration & Counterfactual Visualization
+
+Dimension 12 implemented and verified end-to-end integration and side-by-side counterfactual visualization:
+- **Integrated Digital Twin Workflow**:
+  - Unified Baseline Prediction, What-If Counterfactual Simulator, Changed Inputs Breakdown, Recalculated Derived Features, and TreeSHAP Attributions into one fluid browser dashboard.
+  - Interactive dual-bar CSS visualizer displaying Baseline vs Scenario forecasts alongside absolute ($\Delta\text{ CZK}$) and percentage ($\Delta\%$) metrics.
+  - Automatic recalculation of derived features (`spending_t`, `spending_3m_mean`, `spending_3m_std` `ddof=0`) with strict backend/frontend override prevention.
+  - Non-causal phrasing across UI elements (*"Model attribution under past training patterns"*).
+- **Verified Integration Test Suite**: Executed [`tests/test_integration.py`](tests/test_integration.py) (**All 4 Tests Passed**):
+  1. Baseline prediction API workflow parity — **PASS**
+  2. Scenario simulation API workflow & delta calculation — **PASS**
+  3. Derived feature override rejection — **PASS**
+  4. Scenario TreeSHAP explanation API workflow — **PASS**
+- **Technical Report**: See [reports/dimension12_system_integration.md](reports/dimension12_system_integration.md).
+
+---
+
+## Dimension 13 — End-to-End System Testing & Validation
+
+Dimension 13 implemented and verified system-level end-to-end testing across all digital twin layers:
+- **System-Level Testing & Boundary Audit**:
+  - Validated health checks (`GET /health`), schema metadata (`GET /api/schema`), baseline forecasts, what-if counterfactual scenario simulations, and TreeSHAP feature attributions (`POST /api/explain`).
+  - Verified mathematical fidelity of `spending_3m_std` (`ddof=0`) and 14-feature sequence matching NumPy population standard deviation formula ($\sqrt{\frac{1}{3}\sum (S_k - \mu)^2}$).
+  - Tested guardrails: rejection of negative count values, rejection of prohibited derived feature overrides, HTTP 422 extra field handling, and zero-baseline safety.
+- **Verified System Test Suite**: Executed [`tests/test_e2e_system.py`](tests/test_e2e_system.py) (**All 8 Tests Passed**):
+  1. System health & readiness — **PASS**
+  2. Authoritative 14-feature schema contract — **PASS**
+  3. Baseline prediction API workflow & model parity — **PASS**
+  4. Counterfactual simulation workflow & derived recalculation — **PASS**
+  5. TreeSHAP explanation & efficiency additivity — **PASS**
+  6. Frontend HTML, CSS, JS asset serving & UI contract — **PASS**
+  7. Error handling & boundary guardrails — **PASS**
+  8. Mathematical fidelity & `ddof=0` standard deviation — **PASS**
+- **Technical Report**: See [reports/dimension13_end_to_end_testing.md](reports/dimension13_end_to_end_testing.md).
+
+---
+
 ## Project Structure
 
 ```text
@@ -304,7 +341,9 @@ Personal Financial Digital Twin/
 │   ├── test_simulator.py                 <-- Simulator Test Suite (13/13 Passed)
 │   ├── test_explainer.py                 <-- Real-Time SHAP Explainer Test Suite (14/14 Passed)
 │   ├── test_api.py                       <-- REST API Integration Test Suite (8/8 Passed)
-│   └── test_frontend.py                  <-- Web Frontend Asset Test Suite (3/3 Passed)
+│   ├── test_frontend.py                  <-- Web Frontend Asset Test Suite (3/3 Passed)
+│   ├── test_integration.py               <-- System Integration Test Suite (4/4 Passed)
+│   └── test_e2e_system.py                <-- End-to-End System Testing & Validation Suite (8/8 Passed)
 ├── scripts/
 │   ├── run_preprocessing.py
 │   ├── build_supervised_dataset.py
@@ -323,7 +362,9 @@ Personal Financial Digital Twin/
     ├── dimension8_what_if_simulator.md
     ├── dimension9_individual_shap_explanation.md
     ├── dimension10_rest_api.md
-    └── dimension11_web_frontend.md
+    ├── dimension11_web_frontend.md
+    ├── dimension12_system_integration.md
+    └── dimension13_end_to_end_testing.md
 ```
 
 ---
@@ -369,7 +410,13 @@ python -m pytest tests/test_api.py
 # 10. Run Web Frontend Integration Test Suite (Dimension 11)
 python -m pytest tests/test_frontend.py
 
-# 11. Run complete regression test suite (45/45 Passed)
+# 11. Run System Integration Test Suite (Dimension 12)
+python -m pytest tests/test_integration.py
+
+# 12. Run End-to-End System Testing & Validation Suite (Dimension 13)
+python -m pytest tests/test_e2e_system.py
+
+# 13. Run complete regression test suite (57/57 Passed)
 python -m pytest
 ```
 
@@ -386,11 +433,9 @@ python -m pytest
 
 ## Future Development Roadmap
 
-The upcoming application engineering dimensions include:
-- **Dimension 10 — REST API Backend Application**: Develop lightweight Web API endpoints (`/api/predict`, `/api/explain`, `/api/simulate`).
-- **Dimension 11 — Interactive Web Frontend Interface**: Develop browser-based dashboard with financial state sliders and real-time visualization.
-- **Dimension 12 — System Integration & Counterfactual Visualization**: Connect frontend user controls to backend inference, simulation, and SHAP services.
-- **Dimension 13 — End-to-End System Testing & Validation**: Validate complete web application performance, user interactions, and edge-case behavior.
+All 13 project dimensions (Dimensions 1–13) are complete:
+- **Dimensions 1–5**: Core Academic ML & Research Pipeline (**COMPLETE**)
+- **Dimensions 6–13**: Application Engineering & Digital Twin Deployment Layer (**COMPLETE**)
 
 ---
 
@@ -404,4 +449,8 @@ For comprehensive technical documentation, refer to:
 - [reports/dimension5_explainability.md](reports/dimension5_explainability.md)
 - [reports/dimension8_what_if_simulator.md](reports/dimension8_what_if_simulator.md)
 - [reports/dimension9_individual_shap_explanation.md](reports/dimension9_individual_shap_explanation.md)
+- [reports/dimension10_rest_api.md](reports/dimension10_rest_api.md)
+- [reports/dimension11_web_frontend.md](reports/dimension11_web_frontend.md)
+- [reports/dimension12_system_integration.md](reports/dimension12_system_integration.md)
+- [reports/dimension13_end_to_end_testing.md](reports/dimension13_end_to_end_testing.md)
 - [docs/digital_twin_architecture.md](docs/digital_twin_architecture.md)
