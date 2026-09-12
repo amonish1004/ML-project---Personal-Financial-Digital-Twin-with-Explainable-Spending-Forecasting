@@ -21,9 +21,9 @@ The project is structured into two distinct execution phases:
 | **Dimension 5** | Model Explainability & Feature Attribution (TreeSHAP) | Core ML Pipeline | ✅ **COMPLETE** |
 | **Dimension 6** | Digital Twin Application Architecture & Contract | Application Layer | ✅ **COMPLETE** |
 | **Dimension 7** | Reusable Model Inference Gateway & Validation | Application Layer | ✅ **COMPLETE** |
-| **Dimension 8** | What-If Scenario Simulator Engine | Application Layer | ⏳ **NEXT** |
-| **Dimension 9** | Individual Real-Time SHAP Explanation Service | Application Layer | ⏳ **PLANNED** |
-| **Dimension 10** | REST API Backend Application | Application Layer | ⏳ **PLANNED** |
+| **Dimension 8** | What-If Scenario Simulator Engine | Application Layer | ✅ **COMPLETE** |
+| **Dimension 9** | Individual Real-Time SHAP Explanation Service | Application Layer | ✅ **COMPLETE** |
+| **Dimension 10** | REST API Backend Application | Application Layer | ⏳ **NEXT** |
 | **Dimension 11** | Interactive Web Frontend Interface | Application Layer | ⏳ **PLANNED** |
 | **Dimension 12** | System Integration & Counterfactual Visualization | Application Layer | ⏳ **PLANNED** |
 | **Dimension 13** | End-to-End System Testing & Validation | Application Layer | ⏳ **PLANNED** |
@@ -159,6 +159,60 @@ Dimension 7 implemented and verified the single, reusable prediction gateway for
 
 ---
 
+## Dimension 8 — What-If Scenario Simulator Engine
+
+Dimension 8 implemented and verified the counterfactual scenario simulation engine:
+- **Simulator Module**: [`src/app/simulator.py`](file:///d:/College%20UG/3rd%20year/5TH%20SEM/Machine%20Learning/ML%20project/Personal%20Financial%20Digital%20Twin/src/app/simulator.py)
+  - Public function `simulate_scenario(baseline_state, scenario_changes, model_path=None)`
+  - Direct re-use of prediction gateway `predict_spending()` from `src.app.inference`
+  - Protection of derived features (`spending_t`, `spending_3m_mean`, `spending_3m_std` using `ddof=0`)
+  - Baseline state immutability & zero-division safe percentage delta calculation
+- **Verified Test Suite**: Executed [`python tests/test_simulator.py`](file:///d:/College%20UG/3rd%20year/5TH%20SEM/Machine%20Learning/ML%20project/Personal%20Financial%20Digital%20Twin/tests/test_simulator.py) (**All 13 Tests Passed**):
+  1. Baseline simulation — **PASS**
+  2. Scenario prediction — **PASS**
+  3. Absolute difference calculation — **PASS**
+  4. Percentage difference calculation — **PASS**
+  5. Zero baseline safety — **PASS**
+  6. Derived `spending_t` recalculation — **PASS**
+  7. Derived 3-month mean recalculation — **PASS**
+  8. Derived 3-month std (`ddof=0`) — **PASS**
+  9. Baseline state immutability — **PASS**
+  10. Multiple independent scenarios — **PASS**
+  11. Invalid scenario field rejection — **PASS**
+  12. Derived feature override prevention — **PASS**
+  13. Gateway re-use mock verification — **PASS**
+- **Technical Report**: See [reports/dimension8_what_if_simulator.md](reports/dimension8_what_if_simulator.md).
+
+---
+
+## Dimension 9 — Individual Real-Time SHAP Explanation Service
+
+Dimension 9 implemented and verified the online single-instance TreeSHAP attribution service:
+- **Explainer Module**: [`src/app/explainer.py`](file:///d:/College%20UG/3rd%20year/5TH%20SEM/Machine%20Learning/ML%20project/Personal%20Financial%20Digital%20Twin/src/app/explainer.py)
+  - Public function `explain_prediction(state, model_path=None)`
+  - Direct re-use of prediction gateway `predict_spending()` from `src.app.inference`
+  - Singleton `TreeExplainer` caching (`_EXPLAINER_CACHE`) achieving measured execution latency of **11.42 ms**
+  - Verification of exact SHAP efficiency additivity ($f(x) = E[f(X)] + \sum \phi_j$, additivity delta = **0.000000 CZK**)
+  - Clean, JSON-serializable dictionary structure for future REST API and frontend waterfall charts
+- **Verified Test Suite**: Executed [`python tests/test_explainer.py`](file:///d:/College%20UG/3rd%20year/5TH%20SEM/Machine%20Learning/ML%20project/Personal%20Financial%20Digital%20Twin/tests/test_explainer.py) (**All 14 Tests Passed**):
+  1. TreeExplainer initialization — **PASS**
+  2. Single-instance explanation — **PASS**
+  3. Feature contract & 14-column sequence — **PASS**
+  4. Inference gateway consistency — **PASS**
+  5. Finiteness & numerical types — **PASS**
+  6. Primary feature values fidelity — **PASS**
+  7. Derived `spending_t` recalculation — **PASS**
+  8. Derived 3-month std (`ddof=0`) — **PASS**
+  9. TreeSHAP additivity verification — **PASS**
+  10. Invalid input rejection — **PASS**
+  11. Singleton explainer caching & latency — **PASS**
+  12. Repeatability & determinism — **PASS**
+  13. Frozen model preservation — **PASS**
+  14. JSON serialization compatibility — **PASS**
+- **Technical Report**: See [reports/dimension9_individual_shap_explanation.md](reports/dimension9_individual_shap_explanation.md).
+
+---
+
 ## Project Structure
 
 ```text
@@ -187,9 +241,13 @@ Personal Financial Digital Twin/
 │   └── app/                              <-- Application Layer Package (Dimension 7+)
 │       ├── __init__.py
 │       ├── schema.py                     <-- FinancialState & Derivation Engine
-│       └── inference.py                  <-- Reusable Prediction Gateway (predict_spending)
+│       ├── inference.py                  <-- Reusable Prediction Gateway (predict_spending)
+│       ├── simulator.py                  <-- What-If Scenario Simulator Engine (simulate_scenario)
+│       └── explainer.py                  <-- Real-Time TreeSHAP Explanation Service (explain_prediction)
 ├── tests/
-│   └── test_inference.py                 <-- Inference Layer Test Suite (7/7 Passed)
+│   ├── test_inference.py                 <-- Inference Layer Test Suite (7/7 Passed)
+│   ├── test_simulator.py                 <-- Simulator Test Suite (13/13 Passed)
+│   └── test_explainer.py                 <-- Real-Time SHAP Explainer Test Suite (14/14 Passed)
 ├── scripts/
 │   ├── run_preprocessing.py
 │   ├── build_supervised_dataset.py
@@ -204,7 +262,9 @@ Personal Financial Digital Twin/
     ├── dimension2_preprocessing_and_eda.md
     ├── dimension3_ml_implementation.md
     ├── dimension4_model_evaluation.md
-    └── dimension5_explainability.md
+    ├── dimension5_explainability.md
+    ├── dimension8_what_if_simulator.md
+    └── dimension9_individual_shap_explanation.md
 ```
 
 ---
@@ -237,6 +297,12 @@ python scripts/generate_shap_explanations.py
 
 # 6. Run Inference Layer Verification Test Suite (Dimension 7)
 python tests/test_inference.py
+
+# 7. Run What-If Simulator Test Suite (Dimension 8)
+python tests/test_simulator.py
+
+# 8. Run Individual SHAP Explainer Test Suite (Dimension 9)
+python tests/test_explainer.py
 ```
 
 ---
@@ -253,8 +319,6 @@ python tests/test_inference.py
 ## Future Development Roadmap
 
 The upcoming application engineering dimensions include:
-- **Dimension 8 — What-If Simulator Engine**: Build scenario comparison engine computing baseline vs. counterfactual prediction deltas $\Delta \hat{Y}$.
-- **Dimension 9 — Individual Real-Time SHAP Explanation Service**: Create real-time single-instance Shapley attribution service for interactive user waterfall charts.
 - **Dimension 10 — REST API Backend Application**: Develop lightweight Web API endpoints (`/api/predict`, `/api/explain`, `/api/simulate`).
 - **Dimension 11 — Interactive Web Frontend Interface**: Develop browser-based dashboard with financial state sliders and real-time visualization.
 - **Dimension 12 — System Integration & Counterfactual Visualization**: Connect frontend user controls to backend inference, simulation, and SHAP services.
@@ -270,4 +334,6 @@ For comprehensive technical documentation, refer to:
 - [reports/dimension3_ml_implementation.md](reports/dimension3_ml_implementation.md)
 - [reports/dimension4_model_evaluation.md](reports/dimension4_model_evaluation.md)
 - [reports/dimension5_explainability.md](reports/dimension5_explainability.md)
+- [reports/dimension8_what_if_simulator.md](reports/dimension8_what_if_simulator.md)
+- [reports/dimension9_individual_shap_explanation.md](reports/dimension9_individual_shap_explanation.md)
 - [docs/digital_twin_architecture.md](docs/digital_twin_architecture.md)
