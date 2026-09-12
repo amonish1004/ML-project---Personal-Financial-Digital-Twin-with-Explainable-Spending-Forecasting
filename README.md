@@ -23,9 +23,9 @@ The project is structured into two distinct execution phases:
 | **Dimension 7** | Reusable Model Inference Gateway & Validation | Application Layer | ✅ **COMPLETE** |
 | **Dimension 8** | What-If Scenario Simulator Engine | Application Layer | ✅ **COMPLETE** |
 | **Dimension 9** | Individual Real-Time SHAP Explanation Service | Application Layer | ✅ **COMPLETE** |
-| **Dimension 10** | REST API Backend Application | Application Layer | ⏳ **NEXT** |
-| **Dimension 11** | Interactive Web Frontend Interface | Application Layer | ⏳ **PLANNED** |
-| **Dimension 12** | System Integration & Counterfactual Visualization | Application Layer | ⏳ **PLANNED** |
+| **Dimension 10** | REST API Backend Application | Application Layer | ✅ **COMPLETE** |
+| **Dimension 11** | Interactive Web Frontend Interface | Application Layer | ✅ **COMPLETE** |
+| **Dimension 12** | System Integration & Counterfactual Visualization | Application Layer | ⏳ **NEXT** |
 | **Dimension 13** | End-to-End System Testing & Validation | Application Layer | ⏳ **PLANNED** |
 
 ---
@@ -114,7 +114,7 @@ The selected CatBoost model was retrained on combined **Train + Validation** dat
 | **Naive Persistence Baseline** | 996.51 | 1918.87 | -0.0643 | 418.54 |
 | **Final CatBoost (`models/catboost_model.joblib`)** | **729.88** | **1321.27** | **0.4954** | **377.17** |
 
-- **Model Preservation**: [`models/catboost_model.joblib`](file:///d:/College%20UG/3rd%20year/5TH%20SEM/Machine%20Learning/ML%20project/Personal%20Financial%20Digital%20Twin/models/catboost_model.joblib) remains the authoritative frozen champion model artifact. No retraining occurred during application engineering.
+- **Model Preservation**: [`models/catboost_model.joblib`](models/catboost_model.joblib) remains the authoritative frozen champion model artifact. No retraining occurred during application engineering.
 
 ---
 
@@ -135,7 +135,7 @@ Dimension 5 evaluated exact TreeSHAP attributions across all 53,390 samples in t
 
 Dimension 6 established the formal transition from offline ML modeling to online application engineering:
 - **Architecture Specification Artifact**: See [docs/digital_twin_architecture.md](docs/digital_twin_architecture.md).
-- **ML vs. Application Boundary**: Defined strict isolation ensuring the online web application consumes the frozen [`models/catboost_model.joblib`](file:///d:/College%20UG/3rd%20year/5TH%20SEM/Machine%20Learning/ML%20project/Personal%20Financial%20Digital%20Twin/models/catboost_model.joblib) without retraining or modifying training code.
+- **ML vs. Application Boundary**: Defined strict isolation ensuring the online web application consumes the frozen [`models/catboost_model.joblib`](models/catboost_model.joblib) without retraining or modifying training code.
 - **Mathematical Feature Integrity**: Documented that `spending_3m_std` MUST explicitly use `ddof=0` ($\text{std} = \sqrt{\frac{1}{3}\sum (S_k - \mu)^2}$) to match the exact training feature generation.
 - **Input Editability & Derivation Rules**: Classified features into directly user-editable state inputs (`ending_balance_t`, `income_credit_t`, `debit_count_t`), category debit inputs (`spending_hh_t`..`spending_other_t`), historical lags (`spending_t_minus_1`, `spending_t_minus_2`), and auto-derived features (`spending_t`, `spending_3m_mean`, `spending_3m_std`).
 - **Non-Causal Model Attribution Paradigm**: Framed what-if simulations as model-attribution counterfactuals (*"Under the trained model, changing this input produces a different spending prediction"*), avoiding invalid real-world causal claims.
@@ -145,10 +145,10 @@ Dimension 6 established the formal transition from offline ML modeling to online
 ## Dimension 7 — Reusable Model Inference Layer
 
 Dimension 7 implemented and verified the single, reusable prediction gateway for the digital twin application:
-- **Application Services Package**: [`src/app/`](file:///d:/College%20UG/3rd%20year/5TH%20SEM/Machine%20Learning/ML%20project/Personal%20Financial%20Digital%20Twin/src/app/)
-  - [`src/app/schema.py`](file:///d:/College%20UG/3rd%20year/5TH%20SEM/Machine%20Learning/ML%20project/Personal%20Financial%20Digital%20Twin/src/app/schema.py): Input representation (`FinancialState`), validation rules, and feature derivation (`ddof=0` std, 3M mean, category spending summation).
-  - [`src/app/inference.py`](file:///d:/College%20UG/3rd%20year/5TH%20SEM/Machine%20Learning/ML%20project/Personal%20Financial%20Digital%20Twin/src/app/inference.py): Primary reusable gateway function `predict_spending()`, singleton model caching, and exact 14-column sequence enforcement.
-- **Verified Test Suite**: Executed [`python tests/test_inference.py`](file:///d:/College%20UG/3rd%20year/5TH%20SEM/Machine%20Learning/ML%20project/Personal%20Financial%20Digital%20Twin/tests/test_inference.py) (**All 7 Tests Passed**):
+- **Application Services Package**: [`src/app/`](src/app/)
+  - [`src/app/schema.py`](src/app/schema.py): Input representation (`FinancialState`), validation rules, and feature derivation (`ddof=0` std, 3M mean, category spending summation).
+  - [`src/app/inference.py`](src/app/inference.py): Primary reusable gateway function `predict_spending()`, singleton model caching, and exact 14-column sequence enforcement.
+- **Verified Test Suite**: Executed [`tests/test_inference.py`](tests/test_inference.py) (**All 7 Tests Passed**):
   1. Model loading — **PASS**
   2. Feature contract & 14-column sequence — **PASS**
   3. Feature derivation & `ddof=0` mathematical fidelity — **PASS**
@@ -162,12 +162,12 @@ Dimension 7 implemented and verified the single, reusable prediction gateway for
 ## Dimension 8 — What-If Scenario Simulator Engine
 
 Dimension 8 implemented and verified the counterfactual scenario simulation engine:
-- **Simulator Module**: [`src/app/simulator.py`](file:///d:/College%20UG/3rd%20year/5TH%20SEM/Machine%20Learning/ML%20project/Personal%20Financial%20Digital%20Twin/src/app/simulator.py)
+- **Simulator Module**: [`src/app/simulator.py`](src/app/simulator.py)
   - Public function `simulate_scenario(baseline_state, scenario_changes, model_path=None)`
   - Direct re-use of prediction gateway `predict_spending()` from `src.app.inference`
   - Protection of derived features (`spending_t`, `spending_3m_mean`, `spending_3m_std` using `ddof=0`)
   - Baseline state immutability & zero-division safe percentage delta calculation
-- **Verified Test Suite**: Executed [`python tests/test_simulator.py`](file:///d:/College%20UG/3rd%20year/5TH%20SEM/Machine%20Learning/ML%20project/Personal%20Financial%20Digital%20Twin/tests/test_simulator.py) (**All 13 Tests Passed**):
+- **Verified Test Suite**: Executed [`tests/test_simulator.py`](tests/test_simulator.py) (**All 13 Tests Passed**):
   1. Baseline simulation — **PASS**
   2. Scenario prediction — **PASS**
   3. Absolute difference calculation — **PASS**
@@ -188,13 +188,13 @@ Dimension 8 implemented and verified the counterfactual scenario simulation engi
 ## Dimension 9 — Individual Real-Time SHAP Explanation Service
 
 Dimension 9 implemented and verified the online single-instance TreeSHAP attribution service:
-- **Explainer Module**: [`src/app/explainer.py`](file:///d:/College%20UG/3rd%20year/5TH%20SEM/Machine%20Learning/ML%20project/Personal%20Financial%20Digital%20Twin/src/app/explainer.py)
+- **Explainer Module**: [`src/app/explainer.py`](src/app/explainer.py)
   - Public function `explain_prediction(state, model_path=None)`
   - Direct re-use of prediction gateway `predict_spending()` from `src.app.inference`
   - Singleton `TreeExplainer` caching (`_EXPLAINER_CACHE`) achieving measured execution latency of **11.42 ms**
   - Verification of exact SHAP efficiency additivity ($f(x) = E[f(X)] + \sum \phi_j$, additivity delta = **0.000000 CZK**)
   - Clean, JSON-serializable dictionary structure for future REST API and frontend waterfall charts
-- **Verified Test Suite**: Executed [`python tests/test_explainer.py`](file:///d:/College%20UG/3rd%20year/5TH%20SEM/Machine%20Learning/ML%20project/Personal%20Financial%20Digital%20Twin/tests/test_explainer.py) (**All 14 Tests Passed**):
+- **Verified Test Suite**: Executed [`tests/test_explainer.py`](tests/test_explainer.py) (**All 14 Tests Passed**):
   1. TreeExplainer initialization — **PASS**
   2. Single-instance explanation — **PASS**
   3. Feature contract & 14-column sequence — **PASS**
@@ -210,6 +210,54 @@ Dimension 9 implemented and verified the online single-instance TreeSHAP attribu
   13. Frozen model preservation — **PASS**
   14. JSON serialization compatibility — **PASS**
 - **Technical Report**: See [reports/dimension9_individual_shap_explanation.md](reports/dimension9_individual_shap_explanation.md).
+
+---
+
+## Dimension 10 — REST API Backend Service
+
+Dimension 10 implemented and verified the FastAPI REST API application backend:
+- **API Server Module**: [`src/app/api/server.py`](src/app/api/server.py)
+  - `GET /health`: Lightweight health and model artifact availability check (avoids loading SHAP).
+  - `GET /api/schema`: Authoritative feature contract, editable inputs, and derived calculation metadata.
+  - `POST /api/predict`: Delegates prediction directly to `predict_spending()` (D7).
+  - `POST /api/simulate`: Delegates counterfactual scenario simulation directly to `simulate_scenario()` (D8).
+  - `POST /api/explain`: Delegates local TreeSHAP attribution directly to `explain_prediction()` (D9).
+  - Domain validation error handling (`ValueError`, `TypeError` mapped to HTTP 400 Bad Request).
+- **Verified Integration Test Suite**: Executed [`tests/test_api.py`](tests/test_api.py) (**All 7 Tests Passed**):
+  1. `/health` status check — **PASS**
+  2. `/api/schema` feature contract metadata — **PASS**
+  3. `POST /api/predict` valid prediction & gateway parity — **PASS**
+  4. `POST /api/predict` invalid input domain rejection — **PASS**
+  5. `POST /api/simulate` valid counterfactual scenario — **PASS**
+  6. `POST /api/simulate` derived feature override prevention — **PASS**
+  7. `POST /api/explain` valid TreeSHAP attributions & additivity — **PASS**
+- **Local Startup Command**: `.\.venv\Scripts\python -m uvicorn src.app.api.server:app --reload`
+- **Interactive OpenAPI Documentation**: `http://127.0.0.1:8000/docs`
+- **Technical Report**: See [reports/dimension10_rest_api.md](reports/dimension10_rest_api.md).
+
+---
+
+## Dimension 11 — Interactive Web Frontend Interface
+
+Dimension 11 implemented and verified the browser-based dashboard interface:
+- **Web Frontend Assets**:
+  - HTML Layout: [`src/app/static/index.html`](src/app/static/index.html)
+  - Styling System: [`src/app/static/style.css`](src/app/static/style.css) (Dark Glassmorphism Theme)
+  - Client Application: [`src/app/static/app.js`](src/app/static/app.js)
+- **Features**:
+  - Live header API health badge (polling `/health`).
+  - Financial Profile Presets ("Default", "High Spender", "Saver").
+  - Form controls for 11 primary editable fields with read-only derived preview banner (`spending_t`, `spending_3m_mean`, `spending_3m_std` `ddof=0`).
+  - Next-Month Spending Forecast Card (`POST /api/predict`).
+  - What-If Scenario Simulator Comparison Card (`POST /api/simulate`).
+  - TreeSHAP Local Feature Attribution Horizontal Waterfall List (`POST /api/explain`).
+- **Verified Integration Test Suite**: Executed [`tests/test_frontend.py`](tests/test_frontend.py) (**All 3 Tests Passed**):
+  1. `/` serves web dashboard HTML document — **PASS**
+  2. `/static/style.css` serves CSS stylesheet asset — **PASS**
+  3. `/static/app.js` serves JavaScript application asset — **PASS**
+- **Local Application Startup Command**: `.\.venv\Scripts\python -m uvicorn src.app.api.server:app --reload`
+- **Browser URL**: `http://127.0.0.1:8000/`
+- **Technical Report**: See [reports/dimension11_web_frontend.md](reports/dimension11_web_frontend.md).
 
 ---
 
@@ -243,11 +291,20 @@ Personal Financial Digital Twin/
 │       ├── schema.py                     <-- FinancialState & Derivation Engine
 │       ├── inference.py                  <-- Reusable Prediction Gateway (predict_spending)
 │       ├── simulator.py                  <-- What-If Scenario Simulator Engine (simulate_scenario)
-│       └── explainer.py                  <-- Real-Time TreeSHAP Explanation Service (explain_prediction)
+│       ├── explainer.py                  <-- Real-Time TreeSHAP Explanation Service (explain_prediction)
+│       ├── static/                       <-- Web Frontend Assets (Dimension 11)
+│       │   ├── index.html                <-- HTML Dashboard Structure
+│       │   ├── style.css                 <-- Dark Glassmorphism CSS Design System
+│       │   └── app.js                    <-- Client Application Script
+│       └── api/                          <-- REST API Backend Package (Dimension 10)
+│           ├── __init__.py
+│           └── server.py                 <-- FastAPI Server Implementation
 ├── tests/
 │   ├── test_inference.py                 <-- Inference Layer Test Suite (7/7 Passed)
 │   ├── test_simulator.py                 <-- Simulator Test Suite (13/13 Passed)
-│   └── test_explainer.py                 <-- Real-Time SHAP Explainer Test Suite (14/14 Passed)
+│   ├── test_explainer.py                 <-- Real-Time SHAP Explainer Test Suite (14/14 Passed)
+│   ├── test_api.py                       <-- REST API Integration Test Suite (8/8 Passed)
+│   └── test_frontend.py                  <-- Web Frontend Asset Test Suite (3/3 Passed)
 ├── scripts/
 │   ├── run_preprocessing.py
 │   ├── build_supervised_dataset.py
@@ -264,7 +321,9 @@ Personal Financial Digital Twin/
     ├── dimension4_model_evaluation.md
     ├── dimension5_explainability.md
     ├── dimension8_what_if_simulator.md
-    └── dimension9_individual_shap_explanation.md
+    ├── dimension9_individual_shap_explanation.md
+    ├── dimension10_rest_api.md
+    └── dimension11_web_frontend.md
 ```
 
 ---
@@ -303,6 +362,15 @@ python tests/test_simulator.py
 
 # 8. Run Individual SHAP Explainer Test Suite (Dimension 9)
 python tests/test_explainer.py
+
+# 9. Run REST API Integration Test Suite (Dimension 10)
+python -m pytest tests/test_api.py
+
+# 10. Run Web Frontend Integration Test Suite (Dimension 11)
+python -m pytest tests/test_frontend.py
+
+# 11. Run complete regression test suite (45/45 Passed)
+python -m pytest
 ```
 
 ---
