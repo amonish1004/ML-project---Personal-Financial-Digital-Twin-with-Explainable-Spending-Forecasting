@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Financial Digital Twin — Explainable Spending Forecasting</title>
+    <title>Personal Financial Digital Twin — System Integration & Counterfactual Visualization</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -23,7 +23,7 @@
                 </div>
                 <div>
                     <h1 class="brand-title">Personal Financial Digital Twin</h1>
-                    <p class="brand-subtitle">Explainable Next-Month Spending Forecasting & What-If Simulator</p>
+                    <p class="brand-subtitle">Explainable Next-Month Spending Forecasting, What-If Simulator & Counterfactual Visualization</p>
                 </div>
             </div>
             <div class="header-status">
@@ -42,7 +42,7 @@
                 <div class="card-header">
                     <h2>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-                        Financial Profile Input (Month t)
+                        Baseline Financial Profile Input (Month t)
                     </h2>
                     <div class="preset-buttons">
                         <button type="button" class="btn btn-secondary btn-sm" id="btn-preset-default">Default Profile</button>
@@ -123,7 +123,7 @@
                     <!-- Read-Only Auto-Derived Feature Preview -->
                     <div class="derived-preview-banner">
                         <div class="derived-header">
-                            <span>Auto-Derived Features (Calculated by Backend Contract)</span>
+                            <span>Auto-Derived Features (Backend Calculated • Prohibited from Override)</span>
                         </div>
                         <div class="derived-chips">
                             <div class="chip">
@@ -145,11 +145,11 @@
                     <div class="form-actions">
                         <button type="button" class="btn btn-primary" id="btn-predict">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/></svg>
-                            Run Spending Forecast
+                            Predict Baseline Forecast
                         </button>
-                        <button type="button" class="btn btn-accent" id="btn-explain">
+                        <button type="button" class="btn btn-accent" id="btn-explain-base">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>
-                            Explain Forecast (SHAP)
+                            Explain Baseline (SHAP)
                         </button>
                     </div>
                 </form>
@@ -163,29 +163,29 @@
                     <div class="card-header">
                         <h2>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m16 10-4 4-2-2"/></svg>
-                            Next-Month Spending Forecast (t+1)
+                            Baseline Spending Forecast (t+1)
                         </h2>
                         <span class="badge badge-info">CatBoost Frozen Model</span>
                     </div>
 
                     <div class="prediction-display">
-                        <div class="metric-label">Predicted Outgoing Expenditure</div>
+                        <div class="metric-label">Predicted Baseline Outgoing Expenditure</div>
                         <div class="metric-value-container">
                             <span id="forecast-value" class="metric-number">--</span>
                             <span class="metric-unit">CZK</span>
                         </div>
-                        <p class="metric-footer" id="forecast-footer">Submit a financial profile to compute model prediction via D10 REST API.</p>
+                        <p class="metric-footer" id="forecast-footer">Submit baseline profile to calculate model prediction via D10 REST API.</p>
                     </div>
                 </section>
 
-                <!-- What-If Simulator Card -->
+                <!-- What-If Simulator & Counterfactual Visualization Card -->
                 <section class="dashboard-card glass-panel simulator-card">
                     <div class="card-header">
                         <h2>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
-                            What-If Counterfactual Scenario Simulator
+                            Counterfactual What-If Scenario Visualization
                         </h2>
-                        <span class="badge badge-purple">D8 Engine</span>
+                        <span class="badge badge-purple">D8 + D12 Integration</span>
                     </div>
 
                     <div class="simulator-controls">
@@ -201,16 +201,23 @@
                                 </select>
                             </div>
                             <div class="form-field">
-                                <label for="sim-new-value">New Counterfactual Value (CZK)</label>
+                                <label for="sim-new-value">New Scenario Value (CZK)</label>
                                 <input type="number" id="sim-new-value" step="0.01" value="5000.00">
                             </div>
                         </div>
-                        <button type="button" class="btn btn-secondary" id="btn-simulate">
-                            Run Counterfactual Simulation
-                        </button>
+                        <div class="sim-actions">
+                            <button type="button" class="btn btn-secondary" id="btn-simulate">
+                                Run Counterfactual Simulation
+                            </button>
+                            <button type="button" class="btn btn-accent btn-sm hidden" id="btn-explain-scenario">
+                                Explain Scenario (SHAP)
+                            </button>
+                        </div>
                     </div>
 
+                    <!-- Counterfactual Visualizer & Results Panel -->
                     <div id="sim-results-container" class="sim-results hidden">
+                        <!-- Stat Box Grid -->
                         <div class="sim-grid">
                             <div class="sim-stat-box">
                                 <span class="sim-label">Baseline Forecast</span>
@@ -221,12 +228,52 @@
                                 <span id="sim-scen-pred" class="sim-val">-- CZK</span>
                             </div>
                             <div class="sim-stat-box highlight">
-                                <span class="sim-label">Absolute Delta</span>
+                                <span class="sim-label">Prediction Delta</span>
                                 <span id="sim-abs-diff" class="sim-val">-- CZK</span>
                             </div>
                             <div class="sim-stat-box highlight">
-                                <span class="sim-label">Percentage Delta</span>
+                                <span class="sim-label">Percentage Change</span>
                                 <span id="sim-pct-diff" class="sim-val">-- %</span>
+                            </div>
+                        </div>
+
+                        <!-- Side-by-Side Visual Bar Comparison -->
+                        <div class="chart-comparison-wrapper">
+                            <div class="chart-title">Visual Forecast Comparison</div>
+                            <div class="bar-chart-container">
+                                <div class="bar-chart-row">
+                                    <span class="bar-chart-label">Baseline</span>
+                                    <div class="bar-chart-track">
+                                        <div id="chart-bar-baseline" class="bar-chart-fill bar-baseline" style="width: 0%;"></div>
+                                    </div>
+                                    <span id="chart-val-baseline" class="bar-chart-val">0 CZK</span>
+                                </div>
+                                <div class="bar-chart-row">
+                                    <span class="bar-chart-label">Scenario</span>
+                                    <div class="bar-chart-track">
+                                        <div id="chart-bar-scenario" class="bar-chart-fill bar-scenario" style="width: 0%;"></div>
+                                    </div>
+                                    <span id="chart-val-scenario" class="bar-chart-val">0 CZK</span>
+                                </div>
+                            </div>
+                            <p class="chart-disclaimer">
+                                Note: Scenario forecasts represent model predictions under altered states (non-causal interpretation).
+                            </p>
+                        </div>
+
+                        <!-- Changed Primary Inputs Table -->
+                        <div class="delta-details-section">
+                            <div class="delta-header">Primary Inputs Modified</div>
+                            <div id="changed-inputs-list" class="delta-list">
+                                <!-- Dynamically populated -->
+                            </div>
+                        </div>
+
+                        <!-- Recalculated Derived Features Table -->
+                        <div class="delta-details-section">
+                            <div class="delta-header">Backend Recalculated Derived Features</div>
+                            <div id="recalculated-derived-list" class="delta-list">
+                                <!-- Dynamically populated -->
                             </div>
                         </div>
                     </div>
@@ -237,23 +284,23 @@
                     <div class="card-header">
                         <h2>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                            TreeSHAP Local Feature Attributions
+                            TreeSHAP Feature Attributions
                         </h2>
-                        <span class="badge badge-success">Analytical TreeSHAP</span>
+                        <span id="shap-target-tag" class="badge badge-success">Baseline Profile</span>
                     </div>
 
                     <div id="shap-metadata" class="shap-meta-bar hidden">
-                        <span>Expected Base Value E[f(X)]: <strong id="shap-base-val">--</strong> CZK</span>
+                        <span>Base E[f(X)]: <strong id="shap-base-val">--</strong> CZK</span>
                         <span>Reconstructed: <strong id="shap-recon-val">--</strong> CZK</span>
                         <span>Additivity Delta: <strong id="shap-delta-val">--</strong> CZK</span>
                     </div>
 
                     <p class="shap-disclaimer">
-                        Feature contributions measure local model attribution under the trained CatBoost model (non-causal decomposition).
+                        Feature contributions describe how the trained CatBoost model allocates feature attributions for this prediction (non-causal decomposition).
                     </p>
 
                     <div id="shap-bars-container" class="shap-bars-wrapper">
-                        <div class="empty-state-text">Click "Explain Forecast (SHAP)" to load feature attribution breakdown.</div>
+                        <div class="empty-state-text">Click "Explain Baseline (SHAP)" or "Explain Scenario (SHAP)" to load attributions.</div>
                     </div>
                 </section>
 
