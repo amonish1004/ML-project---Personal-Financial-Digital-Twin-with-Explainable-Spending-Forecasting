@@ -117,7 +117,7 @@ def test_d12_frontend_integration_markup():
     assert response.status_code == 200
     html = response.text
 
-    assert "Counterfactual What-If Scenario Visualization" in html
+    assert "Explore a Scenario" in html
     assert "bar-chart-container" in html
     assert "changed-inputs-list" in html
     assert "recalculated-derived-list" in html

@@ -184,8 +184,8 @@ def test_e2e_frontend_assets_and_ui_contract():
     html = res_index.text
 
     assert "Personal Financial Digital Twin" in html
-    assert "Explainable Next-Month Spending Forecasting" in html
-    assert "Counterfactual What-If Scenario Visualization" in html
+    assert "Spending Forecast" in html
+    assert "Explore a Scenario" in html
     assert "bar-chart-container" in html
     assert "changed-inputs-list" in html
     assert "recalculated-derived-list" in html
