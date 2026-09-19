@@ -5,6 +5,9 @@
 
 let lastBaselineState = null;
 let lastScenarioState = null;
+let lastSavingsPlanState = null;
+let lastShapData = null;
+let lastSimulationData = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     initThemeToggle();
@@ -15,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initFormActionHandlers();
     initSavingsGoalSimulator();
     initTooltips();
+    updateActionPlanner();
 });
 
 // Authoritative Primary Inputs
@@ -141,8 +145,11 @@ function initDerivedPreviewCalculations() {
         document.getElementById('preview-3m-std').textContent = formatCurrency(std_3m);
     };
 
-    const inputs = document.querySelectorAll('.category-input, .lag-input');
-    inputs.forEach(input => input.addEventListener('input', updatePreview));
+    const inputs = document.querySelectorAll('.category-input, .lag-input, #income_credit_t, #ending_balance_t');
+    inputs.forEach(input => input.addEventListener('input', () => {
+        updatePreview();
+        updateActionPlanner();
+    }));
     updatePreview();
 }
 
@@ -258,6 +265,7 @@ async function runPrediction() {
         forecastVal.textContent = formatCurrency(data.prediction);
         forecastFooter.textContent = 'Forecast generated based on your current financial information.';
         updateSavingsContextIfActive();
+        updateActionPlanner();
         showToast('Spending forecast calculated successfully.', 'success');
     } catch (err) {
         forecastVal.textContent = 'Error';
@@ -329,6 +337,26 @@ async function runSimulation() {
             pctDiffEl.textContent = 'N/A';
         }
 
+        // Save simulation state for Financial Action Planner
+        const simFieldSelect = document.getElementById('sim-field-select');
+        const fieldSelectKey = simFieldSelect ? simFieldSelect.value : fieldSelect;
+        const friendlySimNames = {
+            'spending_hh_t': 'Household Spending',
+            'ending_balance_t': 'Current Balance',
+            'income_credit_t': 'Money Coming In',
+            'spending_lo_t': 'Loans / Repayments',
+            'spending_t_minus_1': "Last Month's Spending"
+        };
+
+        lastSimulationData = {
+            basePred,
+            scenPred,
+            absDiff,
+            pctDiff: data.percentage_difference,
+            fieldName: friendlySimNames[fieldSelectKey] || fieldSelectKey,
+            newVal
+        };
+
         // Render Side-by-Side Comparison Bars
         renderComparisonChart(basePred, scenPred);
 
@@ -338,6 +366,7 @@ async function runSimulation() {
         // Render Recalculated Derived Features Table
         renderRecalculatedDerived(data.baseline_state, data.scenario_state);
 
+        updateActionPlanner();
         showToast('Scenario analysis complete.', 'success');
     } catch (err) {
         showToast(err.message, 'error');
@@ -541,9 +570,12 @@ async function runSHAPExplanation(statePayload, targetLabel = 'Baseline Profile'
             container.appendChild(row);
         });
 
+        lastShapData = data;
+
         // Re-initialize tooltips for dynamically added elements
         initTooltips();
 
+        updateActionPlanner();
         showToast(`Explanation loaded for ${targetLabel}.`, 'success');
     } catch (err) {
         if (container) container.innerHTML = `<div class="empty-state-text" style="color: var(--color-error);">Error loading SHAP attributions: ${err.message}</div>`;
@@ -558,7 +590,8 @@ async function runSHAPExplanation(statePayload, targetLabel = 'Baseline Profile'
  * Helper Utilities
  */
 function formatCurrency(val) {
-    return val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (val === null || val === undefined || isNaN(val)) return '0.00';
+    return Number(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function showToast(msg, type = 'info') {
@@ -630,8 +663,6 @@ function initTooltips() {
 /**
  * 8. Dimension 14 — Savings Goal Simulator
  */
-let lastSavingsPlanState = null;
-
 function escapeHTML(str) {
     if (!str) return '';
     return String(str)
@@ -760,6 +791,7 @@ function renderSavingsPlan() {
         });
     }
 
+    updateActionPlanner();
     showToast('Saving plan generated successfully.', 'success');
 }
 
@@ -879,6 +911,152 @@ function renderSavingsContext(requiredMonthly) {
 function updateSavingsContextIfActive() {
     if (lastSavingsPlanState) {
         renderSavingsContext(lastSavingsPlanState.requiredMonthly);
+    }
+}
+
+/**
+ * 9. Financial Action Planner Synthesis Component
+ */
+function updateActionPlanner() {
+    const forecastEl = document.getElementById('forecast-value');
+    let forecastVal = null;
+    if (forecastEl && forecastEl.textContent && forecastEl.textContent !== '--' && forecastEl.textContent !== '...' && forecastEl.textContent !== 'Error') {
+        const textClean = forecastEl.textContent.replace(/,/g, '');
+        const parsed = parseFloat(textClean);
+        if (!isNaN(parsed)) forecastVal = parsed;
+    }
+
+    const payload = getFormPayload();
+    const income = payload && typeof payload.income_credit_t === 'number' ? payload.income_credit_t : 0;
+
+    const forecastValEl = document.getElementById('planner-forecast-val');
+    const incomeValEl = document.getElementById('planner-income-val');
+    const availValEl = document.getElementById('planner-avail-val');
+    const interpretationEl = document.getElementById('planner-interpretation-text');
+
+    if (incomeValEl) incomeValEl.textContent = formatCurrency(income);
+
+    if (forecastVal !== null) {
+        if (forecastValEl) forecastValEl.textContent = formatCurrency(forecastVal);
+        const estimatedAvailable = income - forecastVal;
+        if (availValEl) {
+            availValEl.textContent = formatCurrency(estimatedAvailable);
+            availValEl.className = `planner-val ${estimatedAvailable <= 0 ? 'text-error' : ''}`;
+        }
+
+        if (interpretationEl) {
+            if (estimatedAvailable > 0) {
+                interpretationEl.textContent = `Based on current inputs and model estimates, next month's spending forecast (${formatCurrency(forecastVal)}) is below your reported monthly money coming in (${formatCurrency(income)}), leaving an estimated difference of ${formatCurrency(estimatedAvailable)}.`;
+            } else {
+                interpretationEl.textContent = `Based on current inputs and model estimates, next month's spending forecast (${formatCurrency(forecastVal)}) reaches or exceeds your reported monthly money coming in (${formatCurrency(income)}), resulting in an estimated deficit of ${formatCurrency(estimatedAvailable)}.`;
+            }
+        }
+    } else {
+        if (forecastValEl) forecastValEl.textContent = '--';
+        if (availValEl) availValEl.textContent = '--';
+        if (interpretationEl) {
+            interpretationEl.textContent = "Forecast your next month's spending to view your synthesized action planning summary.";
+        }
+    }
+
+    // 2. What-If Scenario Summary
+    const simSummaryEl = document.getElementById('planner-sim-summary');
+    if (simSummaryEl) {
+        if (lastSimulationData) {
+            const { basePred, scenPred, absDiff, pctDiff, fieldName, newVal } = lastSimulationData;
+            const isPos = absDiff >= 0;
+            simSummaryEl.innerHTML = `
+                <div class="planner-pill">
+                    <span>Changed <strong>${fieldName}</strong> to <strong>${formatCurrency(newVal)}</strong></span>
+                    <span class="${isPos ? 'delta-tag-pos' : 'delta-tag-neg'}">${isPos ? '+' : ''}${formatCurrency(absDiff)} (${isPos ? '+' : ''}${pctDiff !== null && pctDiff !== undefined ? pctDiff.toFixed(2) + '%' : 'N/A'})</span>
+                </div>
+                <p class="planner-placeholder-text" style="margin-top: 0.3rem;">
+                    Model forecast shifts from ${formatCurrency(basePred)} to ${formatCurrency(scenPred)} under this scenario condition (non-causal projection).
+                </p>
+            `;
+        } else {
+            simSummaryEl.innerHTML = '<p class="planner-placeholder-text">Run a What-If scenario to compare alternative spending conditions.</p>';
+        }
+    }
+
+    // 3. Savings Goal Summary
+    const savingsSummaryEl = document.getElementById('planner-savings-summary');
+    if (savingsSummaryEl) {
+        if (lastSavingsPlanState) {
+            const { rawName, amount, months, requiredMonthly } = lastSavingsPlanState;
+            const estimatedAvailable = forecastVal !== null ? income - forecastVal : null;
+            let statusBadge = '<span class="badge badge-info">Goal Planned</span>';
+            if (estimatedAvailable !== null) {
+                if (estimatedAvailable <= 0) {
+                    statusBadge = '<span class="badge badge-warning">Not Currently Feasible</span>';
+                } else if (requiredMonthly > estimatedAvailable) {
+                    statusBadge = '<span class="badge badge-warning">Above Estimated Amount</span>';
+                } else {
+                    statusBadge = '<span class="badge badge-success">Within Estimated Amount</span>';
+                }
+            }
+
+            savingsSummaryEl.innerHTML = `
+                <div class="planner-badge-row">
+                    ${statusBadge}
+                    <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-primary);">${rawName ? escapeHTML(rawName) : 'Savings Target'}</span>
+                </div>
+                <div class="planner-pill">
+                    <span>Target: ${formatCurrency(amount)} in ${months} mo</span>
+                    <span>Required: <strong>${formatCurrency(requiredMonthly)}/mo</strong></span>
+                </div>
+            `;
+        } else {
+            savingsSummaryEl.innerHTML = '<p class="planner-placeholder-text">Set a target goal in the Savings Goal Simulator to evaluate monthly target alignment.</p>';
+        }
+    }
+
+    // 4. SHAP Drivers Summary
+    const shapSummaryEl = document.getElementById('planner-shap-summary');
+    if (shapSummaryEl) {
+        if (lastShapData && lastShapData.features && lastShapData.features.length > 0) {
+            const friendlyNames = {
+                'spending_t': 'Current Spending',
+                'spending_t_minus_1': 'Last Month',
+                'spending_t_minus_2': 'Two Months Ago',
+                'spending_3m_mean': '3-Month Average',
+                'spending_3m_std': 'Spending Variation',
+                'debit_count_t': 'Number of Payments',
+                'income_credit_t': 'Money Coming In',
+                'ending_balance_t': 'Current Balance',
+                'spending_hh_t': 'Household',
+                'spending_st_t': 'Everyday Spending',
+                'spending_in_t': 'Insurance',
+                'spending_lo_t': 'Loans / Repayments',
+                'spending_io_t': 'Financial Payments',
+                'spending_other_t': 'Other Spending'
+            };
+
+            const sorted = [...lastShapData.features].sort((a, b) => Math.abs(b.shap_value) - Math.abs(a.shap_value));
+            const pushingHigher = sorted.filter(f => f.shap_value > 0).slice(0, 2);
+            const pushingLower = sorted.filter(f => f.shap_value < 0).slice(0, 2);
+
+            let higherHtml = pushingHigher.map(f => `<div class="planner-driver-item"><span>${friendlyNames[f.feature] || f.feature}</span><span>+${f.shap_value.toFixed(2)}</span></div>`).join('');
+            let lowerHtml = pushingLower.map(f => `<div class="planner-driver-item"><span>${friendlyNames[f.feature] || f.feature}</span><span>${f.shap_value.toFixed(2)}</span></div>`).join('');
+
+            if (!higherHtml) higherHtml = '<div class="planner-driver-item"><span>None</span><span>--</span></div>';
+            if (!lowerHtml) lowerHtml = '<div class="planner-driver-item"><span>None</span><span>--</span></div>';
+
+            shapSummaryEl.innerHTML = `
+                <div class="planner-driver-grid">
+                    <div class="planner-driver-box">
+                        <span class="planner-driver-title pos">Pushed Estimate Higher</span>
+                        ${higherHtml}
+                    </div>
+                    <div class="planner-driver-box">
+                        <span class="planner-driver-title neg">Pushed Estimate Lower</span>
+                        ${lowerHtml}
+                    </div>
+                </div>
+            `;
+        } else {
+            shapSummaryEl.innerHTML = '<p class="planner-placeholder-text">Click "Why This Forecast?" to analyze model features pushing the estimate higher or lower.</p>';
+        }
     }
 }
 

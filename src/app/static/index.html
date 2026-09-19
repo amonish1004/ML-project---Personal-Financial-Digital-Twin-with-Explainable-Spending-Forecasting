@@ -270,6 +270,65 @@
                     </div>
                 </section>
 
+                <!-- Financial Action Planner Card -->
+                <section class="dashboard-card action-planner-card" id="action-planner-card">
+                    <div class="card-header">
+                        <h2>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            Financial Action Planner
+                        </h2>
+                        <span class="badge badge-purple">Planning Overview</span>
+                    </div>
+
+                    <div class="planner-content">
+                        <!-- 1. Financial Snapshot -->
+                        <div class="planner-section">
+                            <h4 class="planner-subtitle">1. Forecast & Income Snapshot</h4>
+                            <div class="planner-grid-3">
+                                <div class="planner-stat-box">
+                                    <span class="planner-label">Next-Month Forecast</span>
+                                    <span id="planner-forecast-val" class="planner-val">--</span>
+                                </div>
+                                <div class="planner-stat-box">
+                                    <span class="planner-label">Money Coming In</span>
+                                    <span id="planner-income-val" class="planner-val">--</span>
+                                </div>
+                                <div class="planner-stat-box highlight" id="planner-avail-box">
+                                    <span class="planner-label">Estimated Amount After Forecast</span>
+                                    <span id="planner-avail-val" class="planner-val">--</span>
+                                </div>
+                            </div>
+                            <p class="planner-note" id="planner-interpretation-text">
+                                Forecast your next month's spending to view your synthesized action planning summary.
+                            </p>
+                        </div>
+
+                        <!-- 2. What-If Scenario Status -->
+                        <div class="planner-section">
+                            <h4 class="planner-subtitle">2. What-If Scenario Summary</h4>
+                            <div id="planner-sim-summary" class="planner-subcontent">
+                                <p class="planner-placeholder-text">Run a What-If scenario to compare alternative spending conditions.</p>
+                            </div>
+                        </div>
+
+                        <!-- 3. Savings Goal Alignment -->
+                        <div class="planner-section">
+                            <h4 class="planner-subtitle">3. Savings Goal Alignment</h4>
+                            <div id="planner-savings-summary" class="planner-subcontent">
+                                <p class="planner-placeholder-text">Set a target goal in the Savings Goal Simulator to evaluate monthly target alignment.</p>
+                            </div>
+                        </div>
+
+                        <!-- 4. Key Forecast Drivers (SHAP) -->
+                        <div class="planner-section">
+                            <h4 class="planner-subtitle">4. Key Forecast Influencers</h4>
+                            <div id="planner-shap-summary" class="planner-subcontent">
+                                <p class="planner-placeholder-text">Click "Why This Forecast?" to analyze model features pushing the estimate higher or lower.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- What-If Simulator Card -->
                 <section class="dashboard-card simulator-card">
                     <div class="card-header">

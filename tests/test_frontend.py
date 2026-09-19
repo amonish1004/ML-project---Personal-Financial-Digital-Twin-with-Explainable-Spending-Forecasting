@@ -69,6 +69,27 @@ def test_d14_savings_goal_elements_in_frontend():
     assert "renderSavingsPlan" in js
 
 
+def test_financial_action_planner_elements_in_frontend():
+    """Verify Financial Action Planner elements exist in index.html, style.css, and app.js."""
+    res_index = client.get("/")
+    assert res_index.status_code == 200
+    html = res_index.text
+    assert "Financial Action Planner" in html
+    assert "action-planner-card" in html
+    assert "planner-forecast-val" in html
+    assert "planner-income-val" in html
+    assert "planner-avail-val" in html
+
+    res_css = client.get("/static/style.css")
+    assert res_css.status_code == 200
+    assert ".action-planner-card" in res_css.text
+
+    res_js = client.get("/static/app.js")
+    assert res_js.status_code == 200
+    js = res_js.text
+    assert "updateActionPlanner" in js
+
+
 def test_d14_savings_goal_mathematics_cases():
     """
     Verify mathematical specification of D14 savings goal calculator:
