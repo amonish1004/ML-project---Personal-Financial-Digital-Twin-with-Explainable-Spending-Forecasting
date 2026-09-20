@@ -10,6 +10,7 @@ let lastShapData = null;
 let lastSimulationData = null;
 
 document.addEventListener('DOMContentLoaded', () => {
+    initViewNavigation();
     initThemeToggle();
     initHealthCheck();
     initSchemaDisplay();
@@ -18,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initFormActionHandlers();
     initSavingsGoalSimulator();
     initTooltips();
+    updateFinancialSnapshot();
     updateActionPlanner();
 });
 
@@ -143,6 +145,7 @@ function initDerivedPreviewCalculations() {
         document.getElementById('preview-spending-t').textContent = formatCurrency(spending_t);
         document.getElementById('preview-3m-mean').textContent = formatCurrency(mean_3m);
         document.getElementById('preview-3m-std').textContent = formatCurrency(std_3m);
+        updateFinancialSnapshot();
     };
 
     const inputs = document.querySelectorAll('.category-input, .lag-input, #income_credit_t, #ending_balance_t');
@@ -205,23 +208,67 @@ function initFormActionHandlers() {
     const btnSimulate = document.getElementById('btn-simulate');
     const btnExplainBase = document.getElementById('btn-explain-base');
     const btnExplainScen = document.getElementById('btn-explain-scenario');
+    const btnGenInsights = document.getElementById('btn-generate-insights');
+    const btnInsightsScen = document.getElementById('btn-insights-explain-scenario');
+    const btnPlannerFc = document.getElementById('btn-planner-generate-forecast');
+    const btnGenPlan = document.getElementById('btn-generate-financial-plan');
 
     if (btnPredict) btnPredict.addEventListener('click', runPrediction);
     if (btnSimulate) btnSimulate.addEventListener('click', runSimulation);
-    if (btnExplainBase) {
-        btnExplainBase.addEventListener('click', () => {
-            runSHAPExplanation(getFormPayload(), 'Current Profile');
-        });
-    }
-    if (btnExplainScen) {
-        btnExplainScen.addEventListener('click', () => {
-            if (lastScenarioState) {
-                runSHAPExplanation(lastScenarioState, 'Scenario Profile');
-            } else {
-                showToast('Run a scenario simulation first.', 'error');
+    if (btnPlannerFc) btnPlannerFc.addEventListener('click', runPrediction);
+
+    if (btnGenPlan) {
+        btnGenPlan.addEventListener('click', async () => {
+            btnGenPlan.disabled = true;
+            try {
+                await runPrediction();
+                if (!lastShapData) {
+                    try {
+                        const payload = getFormPayload();
+                        const response = await fetch('/api/explain', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        if (response.ok) {
+                            lastShapData = await response.json();
+                        }
+                    } catch (e) {
+                        console.warn('Silent SHAP fetch for financial plan:', e);
+                    }
+                }
+                updateActionPlanner();
+                showToast('Financial action plan generated successfully.', 'success');
+            } catch (err) {
+                showToast(`Could not generate financial plan: ${err.message}`, 'error');
+            } finally {
+                btnGenPlan.disabled = false;
             }
         });
     }
+
+    if (btnExplainBase) {
+        btnExplainBase.addEventListener('click', () => {
+            showAppView('insights');
+            runSHAPExplanation(getFormPayload(), 'Current Profile');
+        });
+    }
+    if (btnGenInsights) {
+        btnGenInsights.addEventListener('click', () => {
+            showAppView('insights');
+            runSHAPExplanation(getFormPayload(), 'Current Profile');
+        });
+    }
+    const handleExplainScenario = () => {
+        if (lastScenarioState) {
+            showAppView('insights');
+            runSHAPExplanation(lastScenarioState, 'Scenario Profile');
+        } else {
+            showToast('Run a scenario simulation first.', 'error');
+        }
+    };
+    if (btnExplainScen) btnExplainScen.addEventListener('click', handleExplainScenario);
+    if (btnInsightsScen) btnInsightsScen.addEventListener('click', handleExplainScenario);
 }
 
 /**
@@ -264,6 +311,7 @@ async function runPrediction() {
 
         forecastVal.textContent = formatCurrency(data.prediction);
         forecastFooter.textContent = 'Forecast generated based on your current financial information.';
+        updateFinancialSnapshot();
         updateSavingsContextIfActive();
         updateActionPlanner();
         showToast('Spending forecast calculated successfully.', 'success');
@@ -315,6 +363,8 @@ async function runSimulation() {
         // Render Numeric Results
         document.getElementById('sim-results-container').classList.remove('hidden');
         document.getElementById('btn-explain-scenario').classList.remove('hidden');
+        const btnInsightsScen = document.getElementById('btn-insights-explain-scenario');
+        if (btnInsightsScen) btnInsightsScen.classList.remove('hidden');
 
         const basePred = data.baseline_prediction;
         const scenPred = data.scenario_prediction;
@@ -345,7 +395,13 @@ async function runSimulation() {
             'ending_balance_t': 'Current Balance',
             'income_credit_t': 'Money Coming In',
             'spending_lo_t': 'Loans / Repayments',
-            'spending_t_minus_1': "Last Month's Spending"
+            'spending_t_minus_1': "Last Month's Spending",
+            'spending_st_t': 'Everyday Spending',
+            'spending_in_t': 'Insurance',
+            'spending_io_t': 'Financial Payments',
+            'spending_other_t': 'Other Spending',
+            'debit_count_t': 'Number of Payments',
+            'spending_t_minus_2': "Two Months Ago Spending"
         };
 
         lastSimulationData = {
@@ -888,6 +944,7 @@ function renderSavingsContext(requiredMonthly) {
         const btnSimShortcut = document.getElementById('btn-savings-goto-sim');
         if (btnSimShortcut) {
             btnSimShortcut.addEventListener('click', () => {
+                showAppView('explore');
                 const simSection = document.querySelector('.simulator-card');
                 if (simSection) {
                     simSection.scrollIntoView({ behavior: 'smooth' });
@@ -911,6 +968,68 @@ function renderSavingsContext(requiredMonthly) {
 function updateSavingsContextIfActive() {
     if (lastSavingsPlanState) {
         renderSavingsContext(lastSavingsPlanState.requiredMonthly);
+    }
+}
+
+/**
+ * View navigation (Overview / Explore / Plan / Insights / About)
+ */
+function showAppView(viewName) {
+    const known = ['twin', 'explore', 'plan', 'insights', 'overview', 'about'];
+    if (!known.includes(viewName)) viewName = 'twin';
+
+    document.querySelectorAll('.app-view').forEach((el) => {
+        const on = el.dataset.view === viewName;
+        el.classList.toggle('is-active', on);
+        if (on) {
+            el.removeAttribute('hidden');
+        } else {
+            el.setAttribute('hidden', '');
+        }
+    });
+
+    document.querySelectorAll('[data-nav-view]').forEach((el) => {
+        const on = el.getAttribute('data-nav-view') === viewName;
+        el.classList.toggle('is-active', on);
+        if (on) {
+            el.setAttribute('aria-current', 'page');
+        } else {
+            el.removeAttribute('aria-current');
+        }
+    });
+}
+
+function initViewNavigation() {
+    document.querySelectorAll('[data-nav-view]').forEach((el) => {
+        el.addEventListener('click', () => {
+            showAppView(el.getAttribute('data-nav-view'));
+        });
+    });
+
+    const hash = (window.location.hash || '').replace('#', '');
+    if (hash) {
+        showAppView(hash);
+    } else {
+        showAppView('twin');
+    }
+}
+
+function updateFinancialSnapshot() {
+    const balEl = document.getElementById('ending_balance_t');
+    const incEl = document.getElementById('income_credit_t');
+    const snapBal = document.getElementById('snapshot-balance');
+    const snapInc = document.getElementById('snapshot-income');
+    const snapFc = document.getElementById('snapshot-forecast');
+    const forecastEl = document.getElementById('forecast-value');
+
+    if (snapBal && balEl) {
+        snapBal.textContent = formatCurrency(parseFloat(balEl.value) || 0);
+    }
+    if (snapInc && incEl) {
+        snapInc.textContent = formatCurrency(parseFloat(incEl.value) || 0);
+    }
+    if (snapFc && forecastEl) {
+        snapFc.textContent = forecastEl.textContent;
     }
 }
 
@@ -1055,7 +1174,20 @@ function updateActionPlanner() {
                 </div>
             `;
         } else {
-            shapSummaryEl.innerHTML = '<p class="planner-placeholder-text">Click "Why This Forecast?" to analyze model features pushing the estimate higher or lower.</p>';
+            shapSummaryEl.innerHTML = `
+                <p class="planner-placeholder-text">
+                    Analyze model features pushing the estimate higher or lower.
+                    <br>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-planner-generate-shap" style="margin-top: 8px;">Generate Explanation</button>
+                </p>
+            `;
+            const btnPlannerShap = document.getElementById('btn-planner-generate-shap');
+            if (btnPlannerShap) {
+                btnPlannerShap.addEventListener('click', () => {
+                    showAppView('insights');
+                    runSHAPExplanation(getFormPayload(), 'Current Profile');
+                });
+            }
         }
     }
 }

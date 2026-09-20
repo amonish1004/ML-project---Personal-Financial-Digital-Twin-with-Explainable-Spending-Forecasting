@@ -4,286 +4,449 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal Financial Digital Twin — Explainable Spending Forecasting</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Top Header Navigation -->
+    <div class="app-shell">
         <header class="app-header">
-            <div class="brand-container">
-                <div class="brand-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="1" x2="12" y2="23"></line>
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                    </svg>
+            <div class="header-inner">
+                <div class="header-top-bar">
+                    <div class="header-brand">
+                        <p class="brand-kicker">Financial Digital Twin</p>
+                        <h1 class="brand-title">Personal Financial Digital Twin</h1>
+                        <p class="brand-subtitle">Spending Forecast &amp; Planning</p>
+                    </div>
+
+                    <div class="header-controls">
+                        <div id="health-badge" class="status-badge badge-pending">
+                            <span class="status-dot"></span>
+                            <span id="health-status-text">Checking...</span>
+                        </div>
+                        <button type="button" id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Light/Dark Theme" title="Toggle Light/Dark Theme">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="4"/>
+                                <path d="M12 2v2"/>
+                                <path d="M12 20v2"/>
+                                <path d="m4.93 4.93 1.41 1.41"/>
+                                <path d="m17.66 17.66 1.41 1.41"/>
+                                <path d="M2 12h2"/>
+                                <path d="M20 12h2"/>
+                                <path d="m6.34 17.66-1.41 1.41"/>
+                                <path d="m19.07 4.93-1.41 1.41"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="brand-title">Personal Financial Digital Twin</h1>
-                    <p class="brand-subtitle">Spending Forecast & What-If Analysis</p>
-                </div>
-            </div>
-            <div class="header-controls">
-                <div id="health-badge" class="status-badge badge-pending">
-                    <span class="status-dot"></span>
-                    <span id="health-status-text">Checking...</span>
-                </div>
-                <button type="button" id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Light/Dark Theme" title="Toggle Light/Dark Theme">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="theme-icon-dark">
-                        <circle cx="12" cy="12" r="4"/>
-                        <path d="M12 2v2"/>
-                        <path d="M12 20v2"/>
-                        <path d="m4.93 4.93 1.41 1.41"/>
-                        <path d="m17.66 17.66 1.41 1.41"/>
-                        <path d="M2 12h2"/>
-                        <path d="M20 12h2"/>
-                        <path d="m6.34 17.66-1.41 1.41"/>
-                        <path d="m19.07 4.93-1.41 1.41"/>
-                    </svg>
-                </button>
+
+                <nav class="primary-nav" aria-label="Primary">
+                    <button type="button" class="nav-link is-active" data-nav-view="twin" aria-current="page">Twin</button>
+                    <button type="button" class="nav-link" data-nav-view="explore">Explore</button>
+                    <button type="button" class="nav-link" data-nav-view="plan">Plan</button>
+                    <button type="button" class="nav-link" data-nav-view="insights">Insights</button>
+                    <button type="button" class="nav-link" data-nav-view="overview">Overview</button>
+                    <button type="button" class="nav-link nav-link-secondary" data-nav-view="about">About &amp; Methodology</button>
+                </nav>
             </div>
         </header>
 
-        <!-- Main Dashboard Content Grid -->
-        <main class="dashboard-grid">
+        <main class="app-main">
 
-            <!-- Left Column: Input Financial State Form & Savings Goal Simulator -->
-            <div class="left-column-stack">
-                <!-- Current Finances Input Card -->
-                <section class="dashboard-card input-card">
+            <!-- TWIN (PRIMARY DIGITAL TWIN WORKSPACE) -->
+            <section id="view-twin" class="app-view is-active" data-view="twin" aria-labelledby="twin-heading">
+                <header class="view-intro">
+                    <h2 id="twin-heading" class="view-title">Twin</h2>
+                    <p class="view-lede">Your current financial position and the digital twin’s estimate for next month’s spending.</p>
+                </header>
+
+                <form id="financial-form" onsubmit="return false;">
+                    <section class="snapshot" aria-labelledby="snapshot-heading">
+                        <h3 id="snapshot-heading" class="section-label">Financial Position Snapshot</h3>
+                        <div class="snapshot-row">
+                            <div class="snapshot-metric">
+                                <label for="ending_balance_t" class="snapshot-label" data-tooltip="ending_balance_t">Current Balance</label>
+                                <div class="snapshot-input-wrap">
+                                    <input type="number" id="ending_balance_t" step="0.01" value="15000.00" class="snapshot-input" required aria-label="Current Balance">
+                                </div>
+                            </div>
+                            <div class="snapshot-metric">
+                                <label for="income_credit_t" class="snapshot-label" data-tooltip="income_credit_t">Money Coming In</label>
+                                <div class="snapshot-input-wrap">
+                                    <input type="number" id="income_credit_t" step="0.01" value="25000.00" class="snapshot-input" required aria-label="Money Coming In">
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="forecast-stage" aria-labelledby="forecast-heading">
+                        <div class="forecast-copy">
+                            <h3 id="forecast-heading" class="section-label">Next Month’s Spending Forecast</h3>
+                            <p class="forecast-kicker">Model Estimate</p>
+                            <div class="prediction-display">
+                                <div class="metric-value-container">
+                                    <span id="forecast-value" class="metric-number">--</span>
+                                </div>
+                                <p class="metric-footer" id="forecast-footer">Enter your financial information and generate a forecast to see the model estimate.</p>
+                            </div>
+                            <p class="model-meta">CatBoost spending model · TreeSHAP attributions available after explanation · estimate, not a guarantee</p>
+                        </div>
+                        <div class="forecast-actions">
+                            <button type="button" class="btn btn-primary" id="btn-predict">Forecast Spending</button>
+                            <div class="quick-actions" aria-label="Quick actions">
+                                <button type="button" class="btn btn-secondary" data-nav-view="explore">Explore a Scenario</button>
+                                <button type="button" class="btn btn-secondary" data-nav-view="plan">Plan a Savings Goal</button>
+                                <button type="button" class="btn btn-accent" id="btn-explain-base">Why This Estimate?</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <details class="disclosure" id="review-inputs">
+                        <summary>
+                            <span class="section-label">Review Financial Inputs</span>
+                            <span class="disclosure-hint">Presets, payment frequency, spending categories, and history</span>
+                        </summary>
+                        <div class="disclosure-body">
+                            <div class="form-toolbar">
+                                <p class="form-toolbar-label">Load a starting profile</p>
+                                <div class="preset-buttons">
+                                    <button type="button" class="btn btn-secondary btn-sm" id="btn-preset-default">Default</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" id="btn-preset-high">High Spender</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" id="btn-preset-saver">Saver</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group-section">
+                                <h3 class="section-title">Payment Frequency</h3>
+                                <p class="section-description">Total number of debits/payments recorded for the month.</p>
+                                <div class="form-grid-3">
+                                    <div class="form-field">
+                                        <label for="debit_count_t" data-tooltip="debit_count_t">Number of Payments</label>
+                                        <input type="number" id="debit_count_t" step="1" min="0" value="12" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group-section">
+                                <h3 class="section-title">Where Your Money Goes</h3>
+                                <p class="section-description">Monthly outflows by category. These sum into current spending.</p>
+                                <div class="form-grid-3">
+                                    <div class="form-field">
+                                        <label for="spending_hh_t" data-tooltip="spending_hh_t">Household</label>
+                                        <input type="number" id="spending_hh_t" step="0.01" min="0" value="3000.00" class="category-input">
+                                    </div>
+                                    <div class="form-field">
+                                        <label for="spending_st_t" data-tooltip="spending_st_t">Everyday Spending</label>
+                                        <input type="number" id="spending_st_t" step="0.01" min="0" value="500.00" class="category-input">
+                                    </div>
+                                    <div class="form-field">
+                                        <label for="spending_in_t" data-tooltip="spending_in_t">Insurance</label>
+                                        <input type="number" id="spending_in_t" step="0.01" min="0" value="1200.00" class="category-input">
+                                    </div>
+                                    <div class="form-field">
+                                        <label for="spending_lo_t" data-tooltip="spending_lo_t">Loans / Repayments</label>
+                                        <input type="number" id="spending_lo_t" step="0.01" min="0" value="2000.00" class="category-input">
+                                    </div>
+                                    <div class="form-field">
+                                        <label for="spending_io_t" data-tooltip="spending_io_t">Financial Payments</label>
+                                        <input type="number" id="spending_io_t" step="0.01" min="0" value="300.00" class="category-input">
+                                    </div>
+                                    <div class="form-field">
+                                        <label for="spending_other_t" data-tooltip="spending_other_t">Other Spending</label>
+                                        <input type="number" id="spending_other_t" step="0.01" min="0" value="1500.00" class="category-input">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group-section">
+                                <h3 class="section-title">Recent Spending History</h3>
+                                <p class="section-description">The previous two months, used with current spending to form lag features.</p>
+                                <div class="form-grid-2">
+                                    <div class="form-field">
+                                        <label for="spending_t_minus_1" data-tooltip="spending_t_minus_1">Last Month</label>
+                                        <input type="number" id="spending_t_minus_1" step="0.01" min="0" value="8000.00" class="lag-input">
+                                    </div>
+                                    <div class="form-field">
+                                        <label for="spending_t_minus_2" data-tooltip="spending_t_minus_2">Two Months Ago</label>
+                                        <input type="number" id="spending_t_minus_2" step="0.01" min="0" value="7500.00" class="lag-input">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="derived-preview-banner">
+                                <div class="derived-header">
+                                    <span>Calculated Automatically</span>
+                                </div>
+                                <div class="derived-chips">
+                                    <div class="chip">
+                                        <span class="chip-label" data-tooltip="spending_t">Current Spending</span>
+                                        <span id="preview-spending-t" class="chip-value">8,500.00</span>
+                                    </div>
+                                    <div class="chip">
+                                        <span class="chip-label" data-tooltip="spending_3m_mean">3-Month Average</span>
+                                        <span id="preview-3m-mean" class="chip-value">8,000.00</span>
+                                    </div>
+                                    <div class="chip">
+                                        <span class="chip-label" data-tooltip="spending_3m_std">Spending Variation</span>
+                                        <span id="preview-3m-std" class="chip-value">408.25</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                </form>
+            </section>
+
+            <!-- EXPLORE -->
+            <section id="view-explore" class="app-view" data-view="explore" aria-labelledby="explore-heading" hidden>
+                <header class="view-intro">
+                    <h2 id="explore-heading" class="view-title">Explore</h2>
+                    <p class="view-lede">Change one financial assumption and compare the model estimate against the current baseline.</p>
+                </header>
+
+                <section class="dashboard-card simulator-card">
                     <div class="card-header">
-                        <h2>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-                            Your Current Finances
-                        </h2>
-                        <div class="preset-buttons">
-                            <button type="button" class="btn btn-secondary btn-sm" id="btn-preset-default">Default</button>
-                            <button type="button" class="btn btn-secondary btn-sm" id="btn-preset-high">High Spender</button>
-                            <button type="button" class="btn btn-secondary btn-sm" id="btn-preset-saver">Saver</button>
+                        <h2>Explore a Scenario</h2>
+                        <span class="badge badge-info">What-If Analysis</span>
+                    </div>
+
+                    <div class="simulator-controls">
+                        <p class="simulator-description">The comparison uses the same CatBoost model on an otherwise unchanged profile. Results describe a change in the estimate, not a proven cause.</p>
+                        <div class="form-grid-2">
+                            <div class="form-field">
+                                <label for="sim-field-select">What to Change</label>
+                                <select id="sim-field-select">
+                                    <option value="spending_hh_t">Household Spending</option>
+                                    <option value="ending_balance_t">Current Balance</option>
+                                    <option value="income_credit_t">Money Coming In</option>
+                                    <option value="spending_lo_t">Loans / Repayments</option>
+                                    <option value="spending_t_minus_1">Last Month's Spending</option>
+                                    <option value="spending_st_t">Everyday Spending</option>
+                                    <option value="spending_in_t">Insurance</option>
+                                    <option value="spending_io_t">Financial Payments</option>
+                                    <option value="spending_other_t">Other Spending</option>
+                                    <option value="debit_count_t">Number of Payments</option>
+                                    <option value="spending_t_minus_2">Two Months Ago Spending</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="sim-new-value">New Value</label>
+                                <input type="number" id="sim-new-value" step="0.01" value="5000.00">
+                            </div>
+                        </div>
+                        <div class="sim-actions">
+                            <button type="button" class="btn btn-primary" id="btn-simulate">Run Scenario</button>
+                            <button type="button" class="btn btn-accent btn-sm hidden" id="btn-explain-scenario">Explain This Scenario</button>
                         </div>
                     </div>
 
-                    <form id="financial-form" onsubmit="return false;">
-                        <!-- Group 1: Primary Account State -->
-                        <div class="form-group-section">
-                            <h3 class="section-title">Account Overview</h3>
-                            <p class="section-description">Tell us about your current financial situation.</p>
+                    <div id="sim-results-container" class="sim-results hidden">
+                        <div class="compare-layout">
+                            <div class="compare-col">
+                                <span class="sim-label">Current Estimate</span>
+                                <span id="sim-base-pred" class="sim-val compare-figure">--</span>
+                            </div>
+                            <div class="compare-col compare-col-scenario">
+                                <span class="sim-label">Scenario Estimate</span>
+                                <span id="sim-scen-pred" class="sim-val compare-figure">--</span>
+                            </div>
+                            <div class="compare-col">
+                                <span class="sim-label">Difference</span>
+                                <span id="sim-abs-diff" class="sim-val">--</span>
+                            </div>
+                            <div class="compare-col">
+                                <span class="sim-label">Percentage Change</span>
+                                <span id="sim-pct-diff" class="sim-val">-- %</span>
+                            </div>
+                        </div>
+
+                        <div class="chart-comparison-wrapper">
+                            <div class="chart-title">Forecast Comparison</div>
+                            <div class="bar-chart-container">
+                                <div class="bar-chart-row">
+                                    <span class="bar-chart-label">Current</span>
+                                    <div class="bar-chart-track">
+                                        <div id="chart-bar-baseline" class="bar-chart-fill bar-baseline" style="width: 0%;"></div>
+                                    </div>
+                                    <span id="chart-val-baseline" class="bar-chart-val">0</span>
+                                </div>
+                                <div class="bar-chart-row">
+                                    <span class="bar-chart-label">Scenario</span>
+                                    <div class="bar-chart-track">
+                                        <div id="chart-bar-scenario" class="bar-chart-fill bar-scenario" style="width: 0%;"></div>
+                                    </div>
+                                    <span id="chart-val-scenario" class="bar-chart-val">0</span>
+                                </div>
+                            </div>
+                            <p class="chart-disclaimer">
+                                What-If estimates show model predictions under different conditions (non-causal interpretation).
+                            </p>
+                        </div>
+
+                        <div class="delta-details-section">
+                            <div class="delta-header">Changed Input</div>
+                            <div id="changed-inputs-list" class="delta-list"></div>
+                        </div>
+
+                        <div class="delta-details-section">
+                            <div class="delta-header">Values Recalculated Automatically</div>
+                            <div id="recalculated-derived-list" class="delta-list"></div>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- PLAN -->
+            <section id="view-plan" class="app-view" data-view="plan" aria-labelledby="plan-heading" hidden>
+                <header class="view-intro">
+                    <h2 id="plan-heading" class="view-title">Plan</h2>
+                    <p class="view-lede">Set an illustrative savings target and review how it sits next to the model estimate. This is a planning aid, not a financial guarantee.</p>
+                </header>
+
+                <div class="plan-stack">
+                    <section class="dashboard-card savings-card">
+                        <div class="card-header">
+                            <h2>Plan a Savings Goal</h2>
+                            <span class="badge badge-info">Savings Goal</span>
+                        </div>
+
+                        <div class="savings-controls">
+                            <p class="savings-description">Name a goal, choose a target amount and a number of months. The schedule is arithmetic only; feasibility language uses the latest model estimate when one exists.</p>
                             <div class="form-grid-3">
                                 <div class="form-field">
-                                    <label for="ending_balance_t" data-tooltip="ending_balance_t">Current Balance</label>
-                                    <input type="number" id="ending_balance_t" step="0.01" value="15000.00" required>
+                                    <label for="goal-name-input">Goal Name</label>
+                                    <input type="text" id="goal-name-input" placeholder="e.g., Emergency fund" maxlength="50">
                                 </div>
                                 <div class="form-field">
-                                    <label for="income_credit_t" data-tooltip="income_credit_t">Money Coming In</label>
-                                    <input type="number" id="income_credit_t" step="0.01" value="25000.00" required>
+                                    <label for="goal-amount-input">Target Amount</label>
+                                    <input type="number" id="goal-amount-input" step="100" min="1" value="20000.00">
                                 </div>
                                 <div class="form-field">
-                                    <label for="debit_count_t" data-tooltip="debit_count_t">Number of Payments</label>
-                                    <input type="number" id="debit_count_t" step="1" min="0" value="12" required>
+                                    <label for="goal-months-input">Number of Months</label>
+                                    <input type="number" id="goal-months-input" step="1" min="1" max="60" value="6">
                                 </div>
+                            </div>
+                            <div class="savings-actions">
+                                <button type="button" class="btn btn-primary" id="btn-calculate-savings">Create Saving Plan</button>
                             </div>
                         </div>
 
-                        <!-- Group 2: Outflow Categories -->
-                        <div class="form-group-section">
-                            <h3 class="section-title">Where Your Money Goes</h3>
-                            <p class="section-description">Break down your monthly spending by category.</p>
-                            <div class="form-grid-3">
-                                <div class="form-field">
-                                    <label for="spending_hh_t" data-tooltip="spending_hh_t">Household</label>
-                                    <input type="number" id="spending_hh_t" step="0.01" min="0" value="3000.00" class="category-input">
+                        <div id="savings-results-container" class="savings-results hidden">
+                            <div class="savings-summary-grid">
+                                <div class="savings-stat-box">
+                                    <span class="savings-label">Target Goal</span>
+                                    <span id="savings-target-val" class="savings-val">--</span>
                                 </div>
-                                <div class="form-field">
-                                    <label for="spending_st_t" data-tooltip="spending_st_t">Everyday Spending</label>
-                                    <input type="number" id="spending_st_t" step="0.01" min="0" value="500.00" class="category-input">
+                                <div class="savings-stat-box">
+                                    <span class="savings-label">Time Available</span>
+                                    <span id="savings-time-val" class="savings-val">--</span>
                                 </div>
-                                <div class="form-field">
-                                    <label for="spending_in_t" data-tooltip="spending_in_t">Insurance</label>
-                                    <input type="number" id="spending_in_t" step="0.01" min="0" value="1200.00" class="category-input">
+                                <div class="savings-stat-box highlight">
+                                    <span class="savings-label">Required Monthly Saving</span>
+                                    <span id="savings-monthly-val" class="savings-val">--</span>
                                 </div>
-                                <div class="form-field">
-                                    <label for="spending_lo_t" data-tooltip="spending_lo_t">Loans / Repayments</label>
-                                    <input type="number" id="spending_lo_t" step="0.01" min="0" value="2000.00" class="category-input">
-                                </div>
-                                <div class="form-field">
-                                    <label for="spending_io_t" data-tooltip="spending_io_t">Financial Payments</label>
-                                    <input type="number" id="spending_io_t" step="0.01" min="0" value="300.00" class="category-input">
-                                </div>
-                                <div class="form-field">
-                                    <label for="spending_other_t" data-tooltip="spending_other_t">Other Spending</label>
-                                    <input type="number" id="spending_other_t" step="0.01" min="0" value="1500.00" class="category-input">
+                            </div>
+
+                            <div id="savings-context-banner" class="savings-context-banner">
+                                <div id="savings-context-body" class="context-body"></div>
+                            </div>
+
+                            <div class="savings-schedule-wrapper">
+                                <div class="schedule-title" id="schedule-table-title">Your Saving Plan</div>
+                                <div class="table-responsive">
+                                    <table class="schedule-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Month</th>
+                                                <th>Planned Saving</th>
+                                                <th>Remaining Goal</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="savings-schedule-body"></tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
+                    </section>
+                </div>
+            </section>
 
-                        <!-- Group 3: Historical Spending Lags -->
-                        <div class="form-group-section">
-                            <h3 class="section-title">Recent Spending History</h3>
-                            <p class="section-description">Your spending from the past two months.</p>
-                            <div class="form-grid-2">
-                                <div class="form-field">
-                                    <label for="spending_t_minus_1" data-tooltip="spending_t_minus_1">Last Month</label>
-                                    <input type="number" id="spending_t_minus_1" step="0.01" min="0" value="8000.00" class="lag-input">
-                                </div>
-                                <div class="form-field">
-                                    <label for="spending_t_minus_2" data-tooltip="spending_t_minus_2">Two Months Ago</label>
-                                    <input type="number" id="spending_t_minus_2" step="0.01" min="0" value="7500.00" class="lag-input">
-                                </div>
-                            </div>
-                        </div>
+            <!-- INSIGHTS -->
+            <section id="view-insights" class="app-view" data-view="insights" aria-labelledby="insights-heading" hidden>
+                <header class="view-intro">
+                    <h2 id="insights-heading" class="view-title">Insights</h2>
+                    <p class="view-lede">Why did the model produce this estimate? TreeSHAP shows which features contribute to the prediction. Influence is not the same as causation.</p>
+                </header>
 
-                        <!-- Read-Only Auto-Derived Feature Preview -->
-                        <div class="derived-preview-banner">
-                            <div class="derived-header">
-                                <span>Calculated Automatically</span>
-                            </div>
-                            <div class="derived-chips">
-                                <div class="chip">
-                                    <span class="chip-label" data-tooltip="spending_t">Current Spending</span>
-                                    <span id="preview-spending-t" class="chip-value">8,500.00</span>
-                                </div>
-                                <div class="chip">
-                                    <span class="chip-label" data-tooltip="spending_3m_mean">3-Month Average</span>
-                                    <span id="preview-3m-mean" class="chip-value">8,000.00</span>
-                                </div>
-                                <div class="chip">
-                                    <span class="chip-label" data-tooltip="spending_3m_std">Spending Variation</span>
-                                    <span id="preview-3m-std" class="chip-value">408.25</span>
-                                </div>
-                            </div>
-                        </div>
+                <div class="insights-toolbar">
+                    <div class="insights-toolbar-copy">
+                        <h3 class="section-label">Model Explanation Controls</h3>
+                        <p class="section-description">Compute TreeSHAP feature attributions for your current financial inputs.</p>
+                    </div>
+                    <div class="insights-toolbar-actions">
+                        <button type="button" class="btn btn-primary" id="btn-generate-insights">Generate Explanation</button>
+                        <button type="button" class="btn btn-secondary hidden" id="btn-insights-explain-scenario">Explain Scenario Profile</button>
+                    </div>
+                </div>
 
-                        <!-- Form Submission Controls -->
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-primary" id="btn-predict">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/></svg>
-                                Forecast Spending
-                            </button>
-                            <button type="button" class="btn btn-accent" id="btn-explain-base">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>
-                                Why This Forecast?
-                            </button>
-                        </div>
-                    </form>
-                </section>
-
-                <!-- Savings Goal Simulator Card (Dimension 14) -->
-                <section class="dashboard-card savings-card">
+                <section class="dashboard-card shap-card">
                     <div class="card-header">
-                        <h2>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"/><path d="M12 11v4"/><path d="M10 13h4"/></svg>
-                            Plan a Savings Goal
-                        </h2>
-                        <span class="badge badge-info">Savings Goal</span>
+                        <h2>What Influenced This Estimate?</h2>
+                        <span id="shap-target-tag" class="badge badge-success">Current Profile</span>
                     </div>
 
-                    <div class="savings-controls">
-                        <p class="savings-description">Set a target goal and timeframe to generate an illustrative month-by-month saving schedule.</p>
-                        <div class="form-grid-3">
-                            <div class="form-field">
-                                <label for="goal-name-input">Goal Name (Optional)</label>
-                                <input type="text" id="goal-name-input" placeholder="e.g., New Laptop" maxlength="50">
-                            </div>
-                            <div class="form-field">
-                                <label for="goal-amount-input">Target Amount</label>
-                                <input type="number" id="goal-amount-input" step="100" min="1" value="20000.00">
-                            </div>
-                            <div class="form-field">
-                                <label for="goal-months-input">Time Available (Months)</label>
-                                <input type="number" id="goal-months-input" step="1" min="1" max="60" value="6">
-                            </div>
-                        </div>
-                        <div class="savings-actions">
-                            <button type="button" class="btn btn-primary" id="btn-calculate-savings">
-                                Create Saving Plan
-                            </button>
-                        </div>
+                    <div id="shap-metadata" class="shap-meta-bar hidden">
+                        <span>Starting Estimate: <strong id="shap-base-val">--</strong></span>
+                        <span>Reconstructed: <strong id="shap-recon-val">--</strong></span>
+                        <span>Calculation Check: <strong id="shap-delta-val">--</strong></span>
                     </div>
 
-                    <!-- Savings Goal Plan Output Container -->
-                    <div id="savings-results-container" class="savings-results hidden">
-                        <div class="savings-summary-grid">
-                            <div class="savings-stat-box">
-                                <span class="savings-label">Target Goal</span>
-                                <span id="savings-target-val" class="savings-val">--</span>
-                            </div>
-                            <div class="savings-stat-box">
-                                <span class="savings-label">Time Available</span>
-                                <span id="savings-time-val" class="savings-val">--</span>
-                            </div>
-                            <div class="savings-stat-box highlight">
-                                <span class="savings-label">Monthly Saving Needed</span>
-                                <span id="savings-monthly-val" class="savings-val">--</span>
-                            </div>
-                        </div>
+                    <p class="shap-disclaimer">
+                        These factors contributed to the model's estimate (non-causal attribution). A positive value pushes the estimate higher; a negative value pushes it lower, based on the model.
+                    </p>
 
-                        <!-- ML Forecast Context & Feasibility Indicator -->
-                        <div id="savings-context-banner" class="savings-context-banner">
-                            <div id="savings-context-body" class="context-body">
-                                <!-- Populated dynamically based on forecast state -->
-                            </div>
-                        </div>
-
-                        <!-- Schedule Table -->
-                        <div class="savings-schedule-wrapper">
-                            <div class="schedule-title" id="schedule-table-title">Your Saving Plan</div>
-                            <div class="table-responsive">
-                                <table class="schedule-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Month</th>
-                                            <th>Planned Saving</th>
-                                            <th>Remaining Goal</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="savings-schedule-body">
-                                        <!-- Dynamically populated -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                    <div id="shap-bars-container" class="shap-bars-wrapper">
+                        <div class="empty-state-text">Click "Generate Explanation" above to see which features most strongly influence the prediction for your financial profile.</div>
                     </div>
                 </section>
-            </div>
+            </section>
 
-            <!-- Right Column: Forecast, Simulator & Explanation Panels -->
-            <div class="right-column-stack">
+            <!-- OVERVIEW (HIGH-LEVEL SUMMARY & FINANCIAL ACTION PLANNER) -->
+            <section id="view-overview" class="app-view" data-view="overview" aria-labelledby="overview-heading" hidden>
+                <header class="view-intro">
+                    <h2 id="overview-heading" class="view-title">Overview</h2>
+                    <p class="view-lede">High-level summary, synthesized action planning, and digital twin insights.</p>
+                </header>
 
-                <!-- Prediction Output Card -->
-                <section class="dashboard-card forecast-card">
-                    <div class="card-header">
-                        <h2>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m16 10-4 4-2-2"/></svg>
-                            Next Month's Spending
-                        </h2>
-                        <span class="badge badge-info">Forecast</span>
+                <div class="overview-quicklinks-banner">
+                    <div class="quicklink-card" data-nav-view="twin">
+                        <span class="quicklink-title">Twin Workspace</span>
+                        <span class="quicklink-desc">Manage primary financial inputs &amp; generate spending forecast</span>
                     </div>
-
-                    <div class="prediction-display">
-                        <div class="metric-label">Estimated spending for the next month</div>
-                        <div class="metric-value-container">
-                            <span id="forecast-value" class="metric-number">--</span>
-                        </div>
-                        <p class="metric-footer" id="forecast-footer">Enter your financial information to generate a forecast.</p>
+                    <div class="quicklink-card" data-nav-view="explore">
+                        <span class="quicklink-title">Explore Scenarios</span>
+                        <span class="quicklink-desc">Run What-If counterfactual spending comparisons</span>
                     </div>
-                </section>
+                    <div class="quicklink-card" data-nav-view="plan">
+                        <span class="quicklink-title">Savings Goal</span>
+                        <span class="quicklink-desc">Define target savings goals &amp; review payment schedules</span>
+                    </div>
+                    <div class="quicklink-card" data-nav-view="insights">
+                        <span class="quicklink-title">Model Insights</span>
+                        <span class="quicklink-desc">TreeSHAP feature attributions &amp; model drivers</span>
+                    </div>
+                </div>
 
-                <!-- Financial Action Planner Card -->
                 <section class="dashboard-card action-planner-card" id="action-planner-card">
                     <div class="card-header">
-                        <h2>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                            Financial Action Planner
-                        </h2>
-                        <span class="badge badge-purple">Planning Overview</span>
+                        <h2>Financial Action Planner</h2>
+                        <div class="card-header-actions">
+                            <button type="button" class="btn btn-primary" id="btn-generate-financial-plan">Generate Financial Plan</button>
+                            <span class="badge badge-info">Interpretation</span>
+                        </div>
                     </div>
 
                     <div class="planner-content">
-                        <!-- 1. Financial Snapshot -->
                         <div class="planner-section">
-                            <h4 class="planner-subtitle">1. Forecast & Income Snapshot</h4>
+                            <h4 class="planner-subtitle">1. Forecast &amp; Income Snapshot</h4>
                             <div class="planner-grid-3">
                                 <div class="planner-stat-box">
                                     <span class="planner-label">Next-Month Forecast</span>
@@ -299,11 +462,10 @@
                                 </div>
                             </div>
                             <p class="planner-note" id="planner-interpretation-text">
-                                Forecast your next month's spending to view your synthesized action planning summary.
+                                Click "Generate Financial Plan" to synthesize your full action planning summary.
                             </p>
                         </div>
 
-                        <!-- 2. What-If Scenario Status -->
                         <div class="planner-section">
                             <h4 class="planner-subtitle">2. What-If Scenario Summary</h4>
                             <div id="planner-sim-summary" class="planner-subcontent">
@@ -311,7 +473,6 @@
                             </div>
                         </div>
 
-                        <!-- 3. Savings Goal Alignment -->
                         <div class="planner-section">
                             <h4 class="planner-subtitle">3. Savings Goal Alignment</h4>
                             <div id="planner-savings-summary" class="planner-subcontent">
@@ -319,179 +480,60 @@
                             </div>
                         </div>
 
-                        <!-- 4. Key Forecast Drivers (SHAP) -->
                         <div class="planner-section">
                             <h4 class="planner-subtitle">4. Key Forecast Influencers</h4>
                             <div id="planner-shap-summary" class="planner-subcontent">
-                                <p class="planner-placeholder-text">Click "Why This Forecast?" to analyze model features pushing the estimate higher or lower.</p>
+                                <p class="planner-placeholder-text">Click "Generate Financial Plan" to analyze model features pushing the estimate higher or lower.</p>
                             </div>
                         </div>
                     </div>
                 </section>
+            </section>
 
-                <!-- What-If Simulator Card -->
-                <section class="dashboard-card simulator-card">
-                    <div class="card-header">
-                        <h2>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
-                            Explore a Scenario
-                        </h2>
-                        <span class="badge badge-purple">What-If Analysis</span>
-                    </div>
+            <!-- ABOUT & METHODOLOGY -->
+            <section id="view-about" class="app-view" data-view="about" aria-labelledby="about-heading" hidden>
+                <header class="view-intro">
+                    <h2 id="about-heading" class="view-title">About &amp; Methodology</h2>
+                    <p class="view-lede">Technical context for the digital twin: the 14-feature contract, derived calculations, and how explanations are produced.</p>
+                </header>
 
-                    <div class="simulator-controls">
-                        <p class="simulator-description">See how changing your financial situation affects the model's spending forecast.</p>
-                        <div class="form-grid-2">
-                            <div class="form-field">
-                                <label for="sim-field-select">What to Change</label>
-                                <select id="sim-field-select">
-                                    <option value="spending_hh_t">Household Spending</option>
-                                    <option value="ending_balance_t">Current Balance</option>
-                                    <option value="income_credit_t">Money Coming In</option>
-                                    <option value="spending_lo_t">Loans / Repayments</option>
-                                    <option value="spending_t_minus_1">Last Month's Spending</option>
-                                </select>
-                            </div>
-                            <div class="form-field">
-                                <label for="sim-new-value">New Value</label>
-                                <input type="number" id="sim-new-value" step="0.01" value="5000.00">
-                            </div>
-                        </div>
-                        <div class="sim-actions">
-                            <button type="button" class="btn btn-secondary" id="btn-simulate">
-                                Explore Scenario
-                            </button>
-                            <button type="button" class="btn btn-accent btn-sm hidden" id="btn-explain-scenario">
-                                Explain This Scenario
-                            </button>
-                        </div>
-                    </div>
+                <article class="methodology">
+                    <h3>What this product estimates</h3>
+                    <p>The application is a personal financial digital twin for next-month spending. It takes a current financial state, derives the remaining model features, and returns a CatBoost estimate. Scenario analysis and TreeSHAP explanations reuse the same contract.</p>
 
-                    <!-- Counterfactual Visualizer & Results Panel -->
-                    <div id="sim-results-container" class="sim-results hidden">
-                        <!-- Stat Box Grid -->
-                        <div class="sim-grid">
-                            <div class="sim-stat-box">
-                                <span class="sim-label">Current Estimate</span>
-                                <span id="sim-base-pred" class="sim-val">--</span>
-                            </div>
-                            <div class="sim-stat-box">
-                                <span class="sim-label">What-If Estimate</span>
-                                <span id="sim-scen-pred" class="sim-val">--</span>
-                            </div>
-                            <div class="sim-stat-box highlight">
-                                <span class="sim-label">Change in Estimate</span>
-                                <span id="sim-abs-diff" class="sim-val">--</span>
-                            </div>
-                            <div class="sim-stat-box highlight">
-                                <span class="sim-label">Change (%)</span>
-                                <span id="sim-pct-diff" class="sim-val">-- %</span>
-                            </div>
-                        </div>
+                    <h3>Model and predictors</h3>
+                    <p>Predictions use a trained CatBoost regressor over a fixed 14-feature vector. Primary inputs are entered in Twin; derived features (current spending, three-month mean, three-month standard deviation with ddof=0) are computed by the backend and must not be overridden in a scenario.</p>
 
-                        <!-- Side-by-Side Visual Bar Comparison -->
-                        <div class="chart-comparison-wrapper">
-                            <div class="chart-title">Forecast Comparison</div>
-                            <div class="bar-chart-container">
-                                <div class="bar-chart-row">
-                                    <span class="bar-chart-label">Current</span>
-                                    <div class="bar-chart-track">
-                                        <div id="chart-bar-baseline" class="bar-chart-fill bar-baseline" style="width: 0%;"></div>
-                                    </div>
-                                    <span id="chart-val-baseline" class="bar-chart-val">0 CZK</span>
-                                </div>
-                                <div class="bar-chart-row">
-                                    <span class="bar-chart-label">Scenario</span>
-                                    <div class="bar-chart-track">
-                                        <div id="chart-bar-scenario" class="bar-chart-fill bar-scenario" style="width: 0%;"></div>
-                                    </div>
-                                    <span id="chart-val-scenario" class="bar-chart-val">0 CZK</span>
-                                </div>
-                            </div>
-                            <p class="chart-disclaimer">
-                                What-If estimates show model predictions under different conditions (non-causal interpretation).
-                            </p>
-                        </div>
+                    <h3>Scenarios and explanations</h3>
+                    <p>A What-If run changes one allowed primary input, rebuilds derived features, and compares two model estimates. TreeSHAP attributions describe how features contribute to a single estimate. They do not prove that changing a real-world behaviour would produce the same difference.</p>
+                </article>
 
-                        <!-- Changed Primary Inputs Breakdown -->
-                        <div class="delta-details-section">
-                            <div class="delta-header">What You Changed</div>
-                            <div id="changed-inputs-list" class="delta-list">
-                                <!-- Dynamically populated -->
+                <details id="schema-details" class="technical-details-panel" open>
+                    <summary>
+                        <div class="summary-title">Technical Details</div>
+                        <svg class="summary-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                    </summary>
+                    <div class="technical-content">
+                        <div class="schema-grid">
+                            <div class="schema-box">
+                                <h4>Model Features (14-Feature Contract)</h4>
+                                <div id="schema-feature-list" class="schema-list"></div>
                             </div>
-                        </div>
-
-                        <!-- Recalculated Derived Features Breakdown -->
-                        <div class="delta-details-section">
-                            <div class="delta-header">Values Recalculated Automatically</div>
-                            <div id="recalculated-derived-list" class="delta-list">
-                                <!-- Dynamically populated -->
+                            <div class="schema-box">
+                                <h4>Derived Feature Calculations</h4>
+                                <div id="schema-math-rules" class="math-rules"></div>
                             </div>
                         </div>
                     </div>
-                </section>
-
-                <!-- SHAP Attribution Card -->
-                <section class="dashboard-card shap-card">
-                    <div class="card-header">
-                        <h2>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                            What Influenced This Estimate?
-                        </h2>
-                        <span id="shap-target-tag" class="badge badge-success">Current Profile</span>
-                    </div>
-
-                    <div id="shap-metadata" class="shap-meta-bar hidden">
-                        <span>Starting Estimate: <strong id="shap-base-val">--</strong></span>
-                        <span>Reconstructed: <strong id="shap-recon-val">--</strong></span>
-                        <span>Calculation Check: <strong id="shap-delta-val">--</strong></span>
-                    </div>
-
-                    <p class="shap-disclaimer">
-                        These factors contributed to the model's estimate (non-causal attribution).
-                    </p>
-
-                    <div id="shap-bars-container" class="shap-bars-wrapper">
-                        <div class="empty-state-text">Click "Why This Forecast?" or "Explain This Scenario" to see what influenced the estimate.</div>
-                    </div>
-                </section>
-            </div>
+                </details>
+            </section>
         </main>
-
-        <!-- Technical Architecture & Schema Specification (Collapsible Details) -->
-        <details id="schema-details" class="technical-details-panel">
-            <summary>
-                <div class="summary-title">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                    Technical Details
-                </div>
-                <svg class="summary-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-            </summary>
-            <div class="technical-content">
-                <div class="schema-grid">
-                    <div class="schema-box">
-                        <h4>Model Features (14-Feature Contract)</h4>
-                        <div id="schema-feature-list" class="schema-list">
-                            <!-- Populated dynamically via /api/schema -->
-                        </div>
-                    </div>
-                    <div class="schema-box">
-                        <h4>Derived Feature Calculations</h4>
-                        <div id="schema-math-rules" class="math-rules">
-                            <!-- Populated dynamically via /api/schema -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </details>
     </div>
 
-    <!-- Notification Banner / Toast -->
     <div id="toast-notification" class="toast hidden">
         <span id="toast-message">Notification</span>
     </div>
 
-    <!-- Tooltip Container -->
     <div id="tooltip" class="tooltip hidden"></div>
 
     <script src="/static/app.js"></script>
