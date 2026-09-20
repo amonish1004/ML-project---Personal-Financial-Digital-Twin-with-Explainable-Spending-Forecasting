@@ -38,6 +38,45 @@ const PRIMARY_FIELDS = [
     'spending_t_minus_2'
 ];
 
+// Single source of truth for human-facing feature terminology
+const FRIENDLY_FEATURE_NAMES = {
+    'ending_balance_t': 'Current Month Ending Balance',
+    'income_credit_t': 'Income & Inflows',
+    'debit_count_t': 'Number of Payments',
+    'spending_hh_t': 'Household Spending',
+    'spending_st_t': 'Bank Fees & Statements',
+    'spending_in_t': 'Insurance Payments',
+    'spending_lo_t': 'Loan Repayments',
+    'spending_io_t': 'Interest Charges',
+    'spending_other_t': 'Other Outflows',
+    'spending_t_minus_1': "Last Month's Spending",
+    'spending_t_minus_2': 'Spending 2 Months Ago',
+    'spending_t': 'Current Month Spending',
+    'spending_3m_mean': '3-Month Average Spending',
+    'spending_3m_std': '3-Month Spending Variation'
+};
+
+// Explanatory tooltips for technical & domain feature names
+const FEATURE_TOOLTIPS = {
+    'ending_balance_t': 'ending_balance_t: Account balance at the end of the current month. Entered separately from spending (observed or scenario value).',
+    'income_credit_t': 'income_credit_t: Total deposits and cash inflows received during the current month (CZK).',
+    'debit_count_t': 'debit_count_t: Total count of outgoing debit transactions recorded during the current month.',
+    'spending_hh_t': 'spending_hh_t: Outgoing debit payments for household utilities, rent, and residential expenses.',
+    'spending_st_t': 'spending_st_t: Bank statement fees, service charges, and routine account debits.',
+    'spending_in_t': 'spending_in_t: Debits for insurance policies and premium payments.',
+    'spending_lo_t': 'spending_lo_t: Loan principal and interest repayment debits.',
+    'spending_io_t': 'spending_io_t: Outward interest payments and financial charges.',
+    'spending_other_t': 'spending_other_t: General, uncategorized, and miscellaneous debit transactions.',
+    'spending_t_minus_1': 'spending_t_minus_1: Total outgoing debit spending in the previous month (t-1).',
+    'spending_t_minus_2': 'spending_t_minus_2: Total outgoing debit spending two months ago (t-2).',
+    'spending_t': 'spending_t: Calculated sum of all 6 current month spending category subtotals.',
+    'spending_3m_mean': 'spending_3m_mean: Calculated average monthly spending across current month, last month, and 2 months ago.',
+    'spending_3m_std': 'spending_3m_std: Technical term: 3-month spending standard deviation (population standard deviation, ddof=0).',
+    'shap_base_val': 'Dataset average prediction baseline (CatBoost expected value prior to local feature shifts).',
+    'shap_recon_val': 'Reconstructed prediction value computed as base value + sum of all feature SHAP values.',
+    'shap_delta_val': 'Additivity check verifying exact alignment between reconstructed and model prediction.'
+};
+
 /**
  * 1. Theme Switcher (Dark/Light Mode with localStorage persistence)
  */
@@ -390,26 +429,13 @@ async function runSimulation() {
         // Save simulation state for Financial Action Planner
         const simFieldSelect = document.getElementById('sim-field-select');
         const fieldSelectKey = simFieldSelect ? simFieldSelect.value : fieldSelect;
-        const friendlySimNames = {
-            'spending_hh_t': 'Household Spending',
-            'ending_balance_t': 'Current Balance',
-            'income_credit_t': 'Money Coming In',
-            'spending_lo_t': 'Loans / Repayments',
-            'spending_t_minus_1': "Last Month's Spending",
-            'spending_st_t': 'Everyday Spending',
-            'spending_in_t': 'Insurance',
-            'spending_io_t': 'Financial Payments',
-            'spending_other_t': 'Other Spending',
-            'debit_count_t': 'Number of Payments',
-            'spending_t_minus_2': "Two Months Ago Spending"
-        };
 
         lastSimulationData = {
             basePred,
             scenPred,
             absDiff,
             pctDiff: data.percentage_difference,
-            fieldName: friendlySimNames[fieldSelectKey] || fieldSelectKey,
+            fieldName: FRIENDLY_FEATURE_NAMES[fieldSelectKey] || fieldSelectKey,
             newVal
         };
 
@@ -468,27 +494,12 @@ function renderChangedInputs(baselineDict, scenarioDict) {
         return;
     }
 
-    // Friendly name mapping
-    const friendlyNames = {
-        'ending_balance_t': 'Current Balance',
-        'income_credit_t': 'Money Coming In',
-        'debit_count_t': 'Number of Payments',
-        'spending_hh_t': 'Household',
-        'spending_st_t': 'Everyday Spending',
-        'spending_in_t': 'Insurance',
-        'spending_lo_t': 'Loans / Repayments',
-        'spending_io_t': 'Financial Payments',
-        'spending_other_t': 'Other Spending',
-        'spending_t_minus_1': 'Last Month',
-        'spending_t_minus_2': 'Two Months Ago'
-    };
-
     changedKeys.forEach(k => {
         const baseV = baselineDict[k];
         const scenV = scenarioDict[k];
         const delta = scenV - baseV;
         const isPos = delta >= 0;
-        const friendlyName = friendlyNames[k] || k;
+        const friendlyName = FRIENDLY_FEATURE_NAMES[k] || k;
 
         const row = document.createElement('div');
         row.className = 'delta-row';
@@ -531,9 +542,9 @@ function renderRecalculatedDerived(baselineDict, scenarioDict) {
     const s_std = Math.sqrt(((s_s_t - s_mean)**2 + (s_tm1 - s_mean)**2 + (s_tm2 - s_mean)**2) / 3.0);
 
     const derivedMetrics = [
-        { name: 'spending_t', friendly: 'Current Spending', base: b_s_t, scen: s_s_t },
-        { name: 'spending_3m_mean', friendly: '3-Month Average', base: b_mean, scen: s_mean },
-        { name: 'spending_3m_std (ddof=0)', friendly: 'Spending Variation', base: b_std, scen: s_std }
+        { name: 'spending_t', friendly: FRIENDLY_FEATURE_NAMES['spending_t'], base: b_s_t, scen: s_s_t },
+        { name: 'spending_3m_mean', friendly: FRIENDLY_FEATURE_NAMES['spending_3m_mean'], base: b_mean, scen: s_mean },
+        { name: 'spending_3m_std', friendly: FRIENDLY_FEATURE_NAMES['spending_3m_std'], base: b_std, scen: s_std }
     ];
 
     derivedMetrics.forEach(m => {
@@ -590,28 +601,10 @@ async function runSHAPExplanation(statePayload, targetLabel = 'Baseline Profile'
         container.innerHTML = '';
         const maxShap = Math.max(...data.features.map(f => Math.abs(f.shap_value)), 1.0);
 
-        // Friendly name mapping for SHAP features
-        const friendlyNames = {
-            'spending_t': 'Current Spending',
-            'spending_t_minus_1': 'Last Month',
-            'spending_t_minus_2': 'Two Months Ago',
-            'spending_3m_mean': '3-Month Average',
-            'spending_3m_std': 'Spending Variation',
-            'debit_count_t': 'Number of Payments',
-            'income_credit_t': 'Money Coming In',
-            'ending_balance_t': 'Current Balance',
-            'spending_hh_t': 'Household',
-            'spending_st_t': 'Everyday Spending',
-            'spending_in_t': 'Insurance',
-            'spending_lo_t': 'Loans / Repayments',
-            'spending_io_t': 'Financial Payments',
-            'spending_other_t': 'Other Spending'
-        };
-
         data.features.forEach(f => {
             const isPos = f.shap_value >= 0;
             const pctWidth = Math.min(100, Math.max(3, (Math.abs(f.shap_value) / maxShap) * 100));
-            const friendlyName = friendlyNames[f.feature] || f.feature;
+            const friendlyName = FRIENDLY_FEATURE_NAMES[f.feature] || f.feature;
 
             const row = document.createElement('div');
             row.className = 'shap-row';
@@ -683,7 +676,7 @@ function initTooltips() {
             const technicalName = element.getAttribute('data-tooltip');
             if (!technicalName) return;
 
-            tooltip.textContent = technicalName;
+            tooltip.textContent = FEATURE_TOOLTIPS[technicalName] || technicalName;
             tooltip.classList.remove('hidden');
 
             const rect = element.getBoundingClientRect();
@@ -909,15 +902,15 @@ function renderSavingsContext(requiredMonthly) {
         let htmlContent = `
             <div class="context-metrics-grid">
                 <div class="context-metric">
-                    <span class="context-label">Money Coming In</span>
+                    <span class="context-label">Income &amp; Inflows</span>
                     <span class="context-val">${formatCurrency(income)}</span>
                 </div>
                 <div class="context-metric">
-                    <span class="context-label">Current Spending Estimate</span>
+                    <span class="context-label">Next-Month Spending Forecast</span>
                     <span class="context-val">${formatCurrency(forecastVal)}</span>
                 </div>
                 <div class="context-metric highlight">
-                    <span class="context-label">Estimated Amount Available After Forecasted Spending</span>
+                    <span class="context-label">Estimated Amount Available After Forecast</span>
                     <span class="context-val ${estimatedAvailable <= 0 ? 'text-error' : ''}">${formatCurrency(estimatedAvailable)}</span>
                 </div>
             </div>
@@ -1134,29 +1127,12 @@ function updateActionPlanner() {
     const shapSummaryEl = document.getElementById('planner-shap-summary');
     if (shapSummaryEl) {
         if (lastShapData && lastShapData.features && lastShapData.features.length > 0) {
-            const friendlyNames = {
-                'spending_t': 'Current Spending',
-                'spending_t_minus_1': 'Last Month',
-                'spending_t_minus_2': 'Two Months Ago',
-                'spending_3m_mean': '3-Month Average',
-                'spending_3m_std': 'Spending Variation',
-                'debit_count_t': 'Number of Payments',
-                'income_credit_t': 'Money Coming In',
-                'ending_balance_t': 'Current Balance',
-                'spending_hh_t': 'Household',
-                'spending_st_t': 'Everyday Spending',
-                'spending_in_t': 'Insurance',
-                'spending_lo_t': 'Loans / Repayments',
-                'spending_io_t': 'Financial Payments',
-                'spending_other_t': 'Other Spending'
-            };
-
             const sorted = [...lastShapData.features].sort((a, b) => Math.abs(b.shap_value) - Math.abs(a.shap_value));
             const pushingHigher = sorted.filter(f => f.shap_value > 0).slice(0, 2);
             const pushingLower = sorted.filter(f => f.shap_value < 0).slice(0, 2);
 
-            let higherHtml = pushingHigher.map(f => `<div class="planner-driver-item"><span>${friendlyNames[f.feature] || f.feature}</span><span>+${f.shap_value.toFixed(2)}</span></div>`).join('');
-            let lowerHtml = pushingLower.map(f => `<div class="planner-driver-item"><span>${friendlyNames[f.feature] || f.feature}</span><span>${f.shap_value.toFixed(2)}</span></div>`).join('');
+            let higherHtml = pushingHigher.map(f => `<div class="planner-driver-item"><span>${FRIENDLY_FEATURE_NAMES[f.feature] || f.feature}</span><span>+${f.shap_value.toFixed(2)}</span></div>`).join('');
+            let lowerHtml = pushingLower.map(f => `<div class="planner-driver-item"><span>${FRIENDLY_FEATURE_NAMES[f.feature] || f.feature}</span><span>${f.shap_value.toFixed(2)}</span></div>`).join('');
 
             if (!higherHtml) higherHtml = '<div class="planner-driver-item"><span>None</span><span>--</span></div>';
             if (!lowerHtml) lowerHtml = '<div class="planner-driver-item"><span>None</span><span>--</span></div>';

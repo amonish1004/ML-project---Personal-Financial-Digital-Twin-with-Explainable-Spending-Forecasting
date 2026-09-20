@@ -12,9 +12,9 @@
             <div class="header-inner">
                 <div class="header-top-bar">
                     <div class="header-brand">
-                        <p class="brand-kicker">Financial Digital Twin</p>
+                        <p class="brand-kicker">Explainable ML Forecasting</p>
                         <h1 class="brand-title">Personal Financial Digital Twin</h1>
-                        <p class="brand-subtitle">Spending Forecast &amp; Planning</p>
+                        <p class="brand-subtitle">Spending Forecast &amp; Action Planning</p>
                     </div>
 
                     <div class="header-controls">
@@ -55,7 +55,7 @@
             <section id="view-twin" class="app-view is-active" data-view="twin" aria-labelledby="twin-heading">
                 <header class="view-intro">
                     <h2 id="twin-heading" class="view-title">Twin</h2>
-                    <p class="view-lede">Your current financial position and the digital twin’s estimate for next month’s spending.</p>
+                    <p class="view-lede">Enter your current financial position to generate the digital twin’s next-month spending forecast.</p>
                 </header>
 
                 <form id="financial-form" onsubmit="return false;">
@@ -63,15 +63,16 @@
                         <h3 id="snapshot-heading" class="section-label">Financial Position Snapshot</h3>
                         <div class="snapshot-row">
                             <div class="snapshot-metric">
-                                <label for="ending_balance_t" class="snapshot-label" data-tooltip="ending_balance_t">Current Balance</label>
+                                <label for="ending_balance_t" class="snapshot-label" data-tooltip="ending_balance_t">Current Month Ending Balance</label>
                                 <div class="snapshot-input-wrap">
-                                    <input type="number" id="ending_balance_t" step="0.01" value="15000.00" class="snapshot-input" required aria-label="Current Balance">
+                                    <input type="number" id="ending_balance_t" step="0.01" value="15000.00" class="snapshot-input" required aria-label="Current Month Ending Balance" title="Account balance at the end of the current month. This is entered separately from spending and can represent either an observed balance or a hypothetical scenario value.">
                                 </div>
+                                <p class="section-description" style="margin-top: 6px; font-size: 11px; line-height: 1.3;">Account balance at the end of the current month. This is entered separately from spending and can represent either an observed balance or a hypothetical scenario value.</p>
                             </div>
                             <div class="snapshot-metric">
-                                <label for="income_credit_t" class="snapshot-label" data-tooltip="income_credit_t">Money Coming In</label>
+                                <label for="income_credit_t" class="snapshot-label" data-tooltip="income_credit_t">Income &amp; Inflows</label>
                                 <div class="snapshot-input-wrap">
-                                    <input type="number" id="income_credit_t" step="0.01" value="25000.00" class="snapshot-input" required aria-label="Money Coming In">
+                                    <input type="number" id="income_credit_t" step="0.01" value="25000.00" class="snapshot-input" required aria-label="Income & Inflows">
                                 </div>
                             </div>
                         </div>
@@ -85,9 +86,9 @@
                                 <div class="metric-value-container">
                                     <span id="forecast-value" class="metric-number">--</span>
                                 </div>
-                                <p class="metric-footer" id="forecast-footer">Enter your financial information and generate a forecast to see the model estimate.</p>
+                                <p class="metric-footer" id="forecast-footer">Enter your financial position and click "Forecast Spending" to calculate the model estimate.</p>
                             </div>
-                            <p class="model-meta">CatBoost spending model · TreeSHAP attributions available after explanation · estimate, not a guarantee</p>
+                            <p class="model-meta">CatBoost machine learning model estimate · TreeSHAP attributions available in Insights · Model estimate, not a guaranteed financial outcome</p>
                         </div>
                         <div class="forecast-actions">
                             <button type="button" class="btn btn-primary" id="btn-predict">Forecast Spending</button>
@@ -102,11 +103,11 @@
                     <details class="disclosure" id="review-inputs">
                         <summary>
                             <span class="section-label">Review Financial Inputs</span>
-                            <span class="disclosure-hint">Presets, payment frequency, spending categories, and history</span>
+                            <span class="disclosure-hint">Profile presets, payment count, spending categories, and historical data</span>
                         </summary>
                         <div class="disclosure-body">
                             <div class="form-toolbar">
-                                <p class="form-toolbar-label">Load a starting profile</p>
+                                <p class="form-toolbar-label">Load a sample financial profile</p>
                                 <div class="preset-buttons">
                                     <button type="button" class="btn btn-secondary btn-sm" id="btn-preset-default">Default</button>
                                     <button type="button" class="btn btn-secondary btn-sm" id="btn-preset-high">High Spender</button>
@@ -116,7 +117,7 @@
 
                             <div class="form-group-section">
                                 <h3 class="section-title">Payment Frequency</h3>
-                                <p class="section-description">Total number of debits/payments recorded for the month.</p>
+                                <p class="section-description">Total count of outgoing debit transactions recorded during the current month.</p>
                                 <div class="form-grid-3">
                                     <div class="form-field">
                                         <label for="debit_count_t" data-tooltip="debit_count_t">Number of Payments</label>
@@ -126,31 +127,31 @@
                             </div>
 
                             <div class="form-group-section">
-                                <h3 class="section-title">Where Your Money Goes</h3>
-                                <p class="section-description">Monthly outflows by category. These sum into current spending.</p>
+                                <h3 class="section-title">Current Month Spending Breakdown</h3>
+                                <p class="section-description">Monthly outgoing debit subtotals by category. These sum automatically into current month spending.</p>
                                 <div class="form-grid-3">
                                     <div class="form-field">
-                                        <label for="spending_hh_t" data-tooltip="spending_hh_t">Household</label>
+                                        <label for="spending_hh_t" data-tooltip="spending_hh_t">Household Spending</label>
                                         <input type="number" id="spending_hh_t" step="0.01" min="0" value="3000.00" class="category-input">
                                     </div>
                                     <div class="form-field">
-                                        <label for="spending_st_t" data-tooltip="spending_st_t">Everyday Spending</label>
+                                        <label for="spending_st_t" data-tooltip="spending_st_t">Bank Fees &amp; Statements</label>
                                         <input type="number" id="spending_st_t" step="0.01" min="0" value="500.00" class="category-input">
                                     </div>
                                     <div class="form-field">
-                                        <label for="spending_in_t" data-tooltip="spending_in_t">Insurance</label>
+                                        <label for="spending_in_t" data-tooltip="spending_in_t">Insurance Payments</label>
                                         <input type="number" id="spending_in_t" step="0.01" min="0" value="1200.00" class="category-input">
                                     </div>
                                     <div class="form-field">
-                                        <label for="spending_lo_t" data-tooltip="spending_lo_t">Loans / Repayments</label>
+                                        <label for="spending_lo_t" data-tooltip="spending_lo_t">Loan Repayments</label>
                                         <input type="number" id="spending_lo_t" step="0.01" min="0" value="2000.00" class="category-input">
                                     </div>
                                     <div class="form-field">
-                                        <label for="spending_io_t" data-tooltip="spending_io_t">Financial Payments</label>
+                                        <label for="spending_io_t" data-tooltip="spending_io_t">Interest Charges</label>
                                         <input type="number" id="spending_io_t" step="0.01" min="0" value="300.00" class="category-input">
                                     </div>
                                     <div class="form-field">
-                                        <label for="spending_other_t" data-tooltip="spending_other_t">Other Spending</label>
+                                        <label for="spending_other_t" data-tooltip="spending_other_t">Other Outflows</label>
                                         <input type="number" id="spending_other_t" step="0.01" min="0" value="1500.00" class="category-input">
                                     </div>
                                 </div>
@@ -158,14 +159,14 @@
 
                             <div class="form-group-section">
                                 <h3 class="section-title">Recent Spending History</h3>
-                                <p class="section-description">The previous two months, used with current spending to form lag features.</p>
+                                <p class="section-description">Total debit spending from the previous two months, combined with current spending to form historical lag features.</p>
                                 <div class="form-grid-2">
                                     <div class="form-field">
-                                        <label for="spending_t_minus_1" data-tooltip="spending_t_minus_1">Last Month</label>
+                                        <label for="spending_t_minus_1" data-tooltip="spending_t_minus_1">Last Month's Spending</label>
                                         <input type="number" id="spending_t_minus_1" step="0.01" min="0" value="8000.00" class="lag-input">
                                     </div>
                                     <div class="form-field">
-                                        <label for="spending_t_minus_2" data-tooltip="spending_t_minus_2">Two Months Ago</label>
+                                        <label for="spending_t_minus_2" data-tooltip="spending_t_minus_2">Spending 2 Months Ago</label>
                                         <input type="number" id="spending_t_minus_2" step="0.01" min="0" value="7500.00" class="lag-input">
                                     </div>
                                 </div>
@@ -177,15 +178,15 @@
                                 </div>
                                 <div class="derived-chips">
                                     <div class="chip">
-                                        <span class="chip-label" data-tooltip="spending_t">Current Spending</span>
+                                        <span class="chip-label" data-tooltip="spending_t">Current Month Spending</span>
                                         <span id="preview-spending-t" class="chip-value">8,500.00</span>
                                     </div>
                                     <div class="chip">
-                                        <span class="chip-label" data-tooltip="spending_3m_mean">3-Month Average</span>
+                                        <span class="chip-label" data-tooltip="spending_3m_mean">3-Month Average Spending</span>
                                         <span id="preview-3m-mean" class="chip-value">8,000.00</span>
                                     </div>
                                     <div class="chip">
-                                        <span class="chip-label" data-tooltip="spending_3m_std">Spending Variation</span>
+                                        <span class="chip-label" data-tooltip="spending_3m_std">3-Month Spending Variation</span>
                                         <span id="preview-3m-std" class="chip-value">408.25</span>
                                     </div>
                                 </div>
@@ -199,32 +200,32 @@
             <section id="view-explore" class="app-view" data-view="explore" aria-labelledby="explore-heading" hidden>
                 <header class="view-intro">
                     <h2 id="explore-heading" class="view-title">Explore</h2>
-                    <p class="view-lede">Change one financial assumption and compare the model estimate against the current baseline.</p>
+                    <p class="view-lede">Simulate counterfactual What-If scenario changes to compare how the model estimate shifts under alternative financial conditions.</p>
                 </header>
 
                 <section class="dashboard-card simulator-card">
                     <div class="card-header">
-                        <h2>Explore a Scenario</h2>
+                        <h2>Explore a What-If Scenario</h2>
                         <span class="badge badge-info">What-If Analysis</span>
                     </div>
 
                     <div class="simulator-controls">
-                        <p class="simulator-description">The comparison uses the same CatBoost model on an otherwise unchanged profile. Results describe a change in the estimate, not a proven cause.</p>
+                        <p class="simulator-description">Change one primary input to observe how the CatBoost model estimate responds. Results represent non-causal model projections.</p>
                         <div class="form-grid-2">
                             <div class="form-field">
-                                <label for="sim-field-select">What to Change</label>
+                                <label for="sim-field-select">Input to Modify</label>
                                 <select id="sim-field-select">
                                     <option value="spending_hh_t">Household Spending</option>
-                                    <option value="ending_balance_t">Current Balance</option>
-                                    <option value="income_credit_t">Money Coming In</option>
-                                    <option value="spending_lo_t">Loans / Repayments</option>
+                                    <option value="ending_balance_t">Current Month Ending Balance</option>
+                                    <option value="income_credit_t">Income &amp; Inflows</option>
+                                    <option value="spending_lo_t">Loan Repayments</option>
                                     <option value="spending_t_minus_1">Last Month's Spending</option>
-                                    <option value="spending_st_t">Everyday Spending</option>
-                                    <option value="spending_in_t">Insurance</option>
-                                    <option value="spending_io_t">Financial Payments</option>
-                                    <option value="spending_other_t">Other Spending</option>
+                                    <option value="spending_st_t">Bank Fees &amp; Statements</option>
+                                    <option value="spending_in_t">Insurance Payments</option>
+                                    <option value="spending_io_t">Interest Charges</option>
+                                    <option value="spending_other_t">Other Outflows</option>
                                     <option value="debit_count_t">Number of Payments</option>
-                                    <option value="spending_t_minus_2">Two Months Ago Spending</option>
+                                    <option value="spending_t_minus_2">Spending 2 Months Ago</option>
                                 </select>
                             </div>
                             <div class="form-field">
@@ -241,7 +242,7 @@
                     <div id="sim-results-container" class="sim-results hidden">
                         <div class="compare-layout">
                             <div class="compare-col">
-                                <span class="sim-label">Current Estimate</span>
+                                <span class="sim-label">Baseline Estimate</span>
                                 <span id="sim-base-pred" class="sim-val compare-figure">--</span>
                             </div>
                             <div class="compare-col compare-col-scenario">
@@ -249,7 +250,7 @@
                                 <span id="sim-scen-pred" class="sim-val compare-figure">--</span>
                             </div>
                             <div class="compare-col">
-                                <span class="sim-label">Difference</span>
+                                <span class="sim-label">Absolute Difference</span>
                                 <span id="sim-abs-diff" class="sim-val">--</span>
                             </div>
                             <div class="compare-col">
@@ -262,7 +263,7 @@
                             <div class="chart-title">Forecast Comparison</div>
                             <div class="bar-chart-container">
                                 <div class="bar-chart-row">
-                                    <span class="bar-chart-label">Current</span>
+                                    <span class="bar-chart-label">Baseline</span>
                                     <div class="bar-chart-track">
                                         <div id="chart-bar-baseline" class="bar-chart-fill bar-baseline" style="width: 0%;"></div>
                                     </div>
@@ -277,17 +278,17 @@
                                 </div>
                             </div>
                             <p class="chart-disclaimer">
-                                What-If estimates show model predictions under different conditions (non-causal interpretation).
+                                What-If scenario comparisons illustrate model sensitivity to individual input changes (non-causal interpretation).
                             </p>
                         </div>
 
                         <div class="delta-details-section">
-                            <div class="delta-header">Changed Input</div>
+                            <div class="delta-header">Modified Input</div>
                             <div id="changed-inputs-list" class="delta-list"></div>
                         </div>
 
                         <div class="delta-details-section">
-                            <div class="delta-header">Values Recalculated Automatically</div>
+                            <div class="delta-header">Derived Features Recalculated Automatically</div>
                             <div id="recalculated-derived-list" class="delta-list"></div>
                         </div>
                     </div>
@@ -298,34 +299,34 @@
             <section id="view-plan" class="app-view" data-view="plan" aria-labelledby="plan-heading" hidden>
                 <header class="view-intro">
                     <h2 id="plan-heading" class="view-title">Plan</h2>
-                    <p class="view-lede">Set an illustrative savings target and review how it sits next to the model estimate. This is a planning aid, not a financial guarantee.</p>
+                    <p class="view-lede">Set a target savings goal and compare the required monthly saving against your estimated remaining income after forecasted spending.</p>
                 </header>
 
                 <div class="plan-stack">
                     <section class="dashboard-card savings-card">
                         <div class="card-header">
-                            <h2>Plan a Savings Goal</h2>
+                            <h2>Plan a Savings Target</h2>
                             <span class="badge badge-info">Savings Goal</span>
                         </div>
 
                         <div class="savings-controls">
-                            <p class="savings-description">Name a goal, choose a target amount and a number of months. The schedule is arithmetic only; feasibility language uses the latest model estimate when one exists.</p>
+                            <p class="savings-description">Define a target goal, savings amount, and timeframe. The schedule provides an arithmetic payment plan and evaluates feasibility against your current model estimate.</p>
                             <div class="form-grid-3">
                                 <div class="form-field">
                                     <label for="goal-name-input">Goal Name</label>
-                                    <input type="text" id="goal-name-input" placeholder="e.g., Emergency fund" maxlength="50">
+                                    <input type="text" id="goal-name-input" placeholder="e.g., Emergency Fund" maxlength="50">
                                 </div>
                                 <div class="form-field">
-                                    <label for="goal-amount-input">Target Amount</label>
+                                    <label for="goal-amount-input">Target Goal Amount</label>
                                     <input type="number" id="goal-amount-input" step="100" min="1" value="20000.00">
                                 </div>
                                 <div class="form-field">
-                                    <label for="goal-months-input">Number of Months</label>
+                                    <label for="goal-months-input">Timeframe (Months)</label>
                                     <input type="number" id="goal-months-input" step="1" min="1" max="60" value="6">
                                 </div>
                             </div>
                             <div class="savings-actions">
-                                <button type="button" class="btn btn-primary" id="btn-calculate-savings">Create Saving Plan</button>
+                                <button type="button" class="btn btn-primary" id="btn-calculate-savings">Create Savings Plan</button>
                             </div>
                         </div>
 
@@ -336,7 +337,7 @@
                                     <span id="savings-target-val" class="savings-val">--</span>
                                 </div>
                                 <div class="savings-stat-box">
-                                    <span class="savings-label">Time Available</span>
+                                    <span class="savings-label">Timeframe</span>
                                     <span id="savings-time-val" class="savings-val">--</span>
                                 </div>
                                 <div class="savings-stat-box highlight">
@@ -350,13 +351,13 @@
                             </div>
 
                             <div class="savings-schedule-wrapper">
-                                <div class="schedule-title" id="schedule-table-title">Your Saving Plan</div>
+                                <div class="schedule-title" id="schedule-table-title">Your Savings Plan</div>
                                 <div class="table-responsive">
                                     <table class="schedule-table">
                                         <thead>
                                             <tr>
                                                 <th>Month</th>
-                                                <th>Planned Saving</th>
+                                                <th>Planned Monthly Saving</th>
                                                 <th>Remaining Goal</th>
                                             </tr>
                                         </thead>
@@ -373,13 +374,13 @@
             <section id="view-insights" class="app-view" data-view="insights" aria-labelledby="insights-heading" hidden>
                 <header class="view-intro">
                     <h2 id="insights-heading" class="view-title">Insights</h2>
-                    <p class="view-lede">Why did the model produce this estimate? TreeSHAP shows which features contribute to the prediction. Influence is not the same as causation.</p>
+                    <p class="view-lede">Understand why the CatBoost model produced a specific forecast using local TreeSHAP feature attributions.</p>
                 </header>
 
                 <div class="insights-toolbar">
                     <div class="insights-toolbar-copy">
                         <h3 class="section-label">Model Explanation Controls</h3>
-                        <p class="section-description">Compute TreeSHAP feature attributions for your current financial inputs.</p>
+                        <p class="section-description">Compute TreeSHAP attributions to see which features pushed your spending estimate higher or lower.</p>
                     </div>
                     <div class="insights-toolbar-actions">
                         <button type="button" class="btn btn-primary" id="btn-generate-insights">Generate Explanation</button>
@@ -394,13 +395,13 @@
                     </div>
 
                     <div id="shap-metadata" class="shap-meta-bar hidden">
-                        <span>Starting Estimate: <strong id="shap-base-val">--</strong></span>
-                        <span>Reconstructed: <strong id="shap-recon-val">--</strong></span>
-                        <span>Calculation Check: <strong id="shap-delta-val">--</strong></span>
+                        <span data-tooltip="shap_base_val">Dataset Average Starting Point: <strong id="shap-base-val">--</strong></span>
+                        <span data-tooltip="shap_recon_val">Reconstructed Prediction: <strong id="shap-recon-val">--</strong></span>
+                        <span data-tooltip="shap_delta_val">Additivity Check: <strong id="shap-delta-val">--</strong></span>
                     </div>
 
                     <p class="shap-disclaimer">
-                        These factors contributed to the model's estimate (non-causal attribution). A positive value pushes the estimate higher; a negative value pushes it lower, based on the model.
+                        Feature attributions show how individual inputs pushed the model's estimate higher (positive) or lower (negative) relative to the baseline dataset average.
                     </p>
 
                     <div id="shap-bars-container" class="shap-bars-wrapper">
@@ -413,13 +414,13 @@
             <section id="view-overview" class="app-view" data-view="overview" aria-labelledby="overview-heading" hidden>
                 <header class="view-intro">
                     <h2 id="overview-heading" class="view-title">Overview</h2>
-                    <p class="view-lede">High-level summary, synthesized action planning, and digital twin insights.</p>
+                    <p class="view-lede">Executive summary synthesizing your spending forecast, scenario comparisons, savings targets, and key model drivers.</p>
                 </header>
 
                 <div class="overview-quicklinks-banner">
                     <div class="quicklink-card" data-nav-view="twin">
                         <span class="quicklink-title">Twin Workspace</span>
-                        <span class="quicklink-desc">Manage primary financial inputs &amp; generate spending forecast</span>
+                        <span class="quicklink-desc">Manage primary inputs &amp; generate next-month spending forecast</span>
                     </div>
                     <div class="quicklink-card" data-nav-view="explore">
                         <span class="quicklink-title">Explore Scenarios</span>
@@ -427,11 +428,11 @@
                     </div>
                     <div class="quicklink-card" data-nav-view="plan">
                         <span class="quicklink-title">Savings Goal</span>
-                        <span class="quicklink-desc">Define target savings goals &amp; review payment schedules</span>
+                        <span class="quicklink-desc">Plan savings targets &amp; evaluate monthly affordability</span>
                     </div>
                     <div class="quicklink-card" data-nav-view="insights">
                         <span class="quicklink-title">Model Insights</span>
-                        <span class="quicklink-desc">TreeSHAP feature attributions &amp; model drivers</span>
+                        <span class="quicklink-desc">View TreeSHAP feature attributions &amp; model drivers</span>
                     </div>
                 </div>
 
@@ -453,11 +454,11 @@
                                     <span id="planner-forecast-val" class="planner-val">--</span>
                                 </div>
                                 <div class="planner-stat-box">
-                                    <span class="planner-label">Money Coming In</span>
+                                    <span class="planner-label">Income &amp; Inflows</span>
                                     <span id="planner-income-val" class="planner-val">--</span>
                                 </div>
                                 <div class="planner-stat-box highlight" id="planner-avail-box">
-                                    <span class="planner-label">Estimated Amount After Forecast</span>
+                                    <span class="planner-label">Estimated Amount Available After Forecast</span>
                                     <span id="planner-avail-val" class="planner-val">--</span>
                                 </div>
                             </div>
@@ -494,23 +495,23 @@
             <section id="view-about" class="app-view" data-view="about" aria-labelledby="about-heading" hidden>
                 <header class="view-intro">
                     <h2 id="about-heading" class="view-title">About &amp; Methodology</h2>
-                    <p class="view-lede">Technical context for the digital twin: the 14-feature contract, derived calculations, and how explanations are produced.</p>
+                    <p class="view-lede">Technical architecture, 14-feature contract specifications, derived calculations, and explanation methodology.</p>
                 </header>
 
                 <article class="methodology">
-                    <h3>What this product estimates</h3>
-                    <p>The application is a personal financial digital twin for next-month spending. It takes a current financial state, derives the remaining model features, and returns a CatBoost estimate. Scenario analysis and TreeSHAP explanations reuse the same contract.</p>
+                    <h3>What this system estimates</h3>
+                    <p>The application is a personal financial digital twin for predicting next-month total outgoing debit spending (Czech bank dataset accounts). It accepts primary financial inputs, computes derived features, and generates CatBoost estimates.</p>
 
-                    <h3>Model and predictors</h3>
-                    <p>Predictions use a trained CatBoost regressor over a fixed 14-feature vector. Primary inputs are entered in Twin; derived features (current spending, three-month mean, three-month standard deviation with ddof=0) are computed by the backend and must not be overridden in a scenario.</p>
+                    <h3>Model and predictor contract</h3>
+                    <p>Predictions use a trained CatBoost regressor over a fixed 14-feature vector. Primary inputs are entered in Twin; derived features (current month spending, 3-month mean, 3-month population standard deviation with ddof=0) are computed automatically by the backend.</p>
 
                     <h3>Scenarios and explanations</h3>
-                    <p>A What-If run changes one allowed primary input, rebuilds derived features, and compares two model estimates. TreeSHAP attributions describe how features contribute to a single estimate. They do not prove that changing a real-world behaviour would produce the same difference.</p>
+                    <p>What-If scenarios evaluate model sensitivity by modifying one primary input, re-deriving features, and comparing baseline vs scenario estimates. TreeSHAP attributions quantify individual feature contributions to a prediction (non-causal interpretation).</p>
                 </article>
 
                 <details id="schema-details" class="technical-details-panel" open>
                     <summary>
-                        <div class="summary-title">Technical Details</div>
+                        <div class="summary-title">Technical Feature Schema &amp; Mathematical Rules</div>
                         <svg class="summary-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                     </summary>
                     <div class="technical-content">
@@ -539,3 +540,4 @@
     <script src="/static/app.js"></script>
 </body>
 </html>
+
