@@ -35,21 +35,24 @@ The **Personal Financial Digital Twin** combines supervised machine learning, ex
 
 ## Key Features
 
-- **Six Interactive Workspace Areas:**
+- **Seven Interactive Workspace Areas:**
   - **Twin:** Main financial state input workspace and baseline spending forecast.
   - **Explore:** Counterfactual What-If scenario simulator and comparison engine.
   - **Plan:** Interactive Savings Goal Simulator for target allocations.
   - **Insights:** Self-service TreeSHAP feature attributions and waterfall visualizations.
   - **Overview:** Executive financial dashboard and synthesized Financial Action Planner.
+  - **Export:** On-demand generation of PDF reports and Excel data workbooks.
   - **About & Methodology:** System documentation, data provenance, and model specifications.
 - **Financial Profile Presets:** One-click loading for *Default*, *High Spender*, and *Saver* account profiles.
 - **Form Controls & Derived Previews:** 11 editable inputs with real-time read-only derived previews (`spending_t`, `spending_3m_mean`, `spending_3m_std` with `ddof=0`).
 - **Next-Month Spending Forecast:** Machine learning forecast of outgoing debit expenditure ($t+1$).
-- **What-If Scenario Simulator:** Real-time side-by-side comparison of baseline vs. scenario forecasts, showing absolute ($\Delta\text{ CZK}$) and percentage ($\Delta\%$) changes.
+- **What-If Scenario Simulator:** Real-time side-by-side comparison of baseline vs. scenario forecasts, showing absolute ($\Delta\text{ Value}$) and percentage ($\Delta\%$) changes.
 - **Explainable TreeSHAP Attributions:** Local feature attribution breakdown showing positive and negative drivers of individual forecasts.
 - **Savings Goal Simulator (Plan):** Target saving allocation calculator (`goal_amount / timeframe_months` with final-month rounding adjustment) to evaluate monthly saving feasibility.
 - **Financial Action Planner (Overview):** Synthesizes baseline forecasts, income snapshots, What-If results, and savings goals into clear financial guidance.
+- **PDF & Excel Export Service (Export):** Downloads current financial position, forecasts, scenario simulations, savings schedules, and TreeSHAP attributions as PDF reports or Excel workbooks.
 - **Dark Glassmorphism Interface:** Modern UI design system featuring live backend API status checks, theme toggles, and cross-tab state preservation.
+
 
 ---
 
@@ -165,7 +168,8 @@ Processed Data ➔ 14-Feature Schema ➔ Frozen CatBoost Model ➔ Reusable Gate
 3. **Plan Workspace (Savings Goal Simulator):** Target savings goal calculator (`goal_amount / timeframe_months` with final-month adjustment) to compute required monthly saving allocations.
 4. **Insights Workspace:** Real-time TreeSHAP feature attributions and horizontal waterfall visualizations.
 5. **Overview Workspace:** High-level summary view and the **Financial Action Planner**, which synthesizes forecasts, income, scenario deltas, and savings goals into actionable financial recommendations.
-6. **About & Methodology:** Technical documentation, feature descriptions, data provenance, and system architecture.
+6. **Export Workspace:** Download current financial inputs and analysis outputs in PDF or Excel format.
+7. **About & Methodology:** Technical documentation, feature descriptions, data provenance, and system architecture.
 
 ---
 
@@ -185,10 +189,29 @@ For technical explainability reports, see [`reports/dimension5_explainability.md
 
 The application includes two presentation and planning modules designed to help users translate model forecasts into actionable financial strategies:
 
-- **Savings Goal Simulator (Plan Tab):** Allows users to specify a goal name, target amount (CZK), and timeframe (1–60 months) to compute required monthly savings (`goal_amount / timeframe_months` with final-month rounding adjustment).
+- **Savings Goal Simulator (Plan Tab):** Allows users to specify a goal name, target amount, and timeframe (1–60 months) to compute required monthly savings (`goal_amount / timeframe_months` with final-month rounding adjustment).
 - **Financial Action Planner (Overview Tab):** Synthesizes baseline spending forecasts, income snapshots, What-If simulation results, and active savings goals to present a structured financial plan.
 
 *Note: The Savings Goal Simulator and Financial Action Planner are presentation and interpretation layers. They build directly upon existing model forecasts and do not introduce additional machine learning models.*
+
+---
+
+## Financial Analysis Export Service
+
+The application supports exporting the user's current financial analysis session into portable, readable document formats:
+
+1. **PDF Financial Report (`.pdf`):** A publication-ready report formatted with section tables, key forecast cards, and methodology disclaimers.
+2. **Excel Data Workbook (`.xlsx`):** A multi-worksheet workbook containing structured sheets for Executive Summary, Financial Inputs, Scenario Comparisons, Savings Goal Schedule, and SHAP Attributions.
+
+Depending on the current application state, exports incorporate relevant session data such as:
+- Financial inputs & derived features
+- Next-month spending forecast
+- What-If scenario simulation results
+- Savings goal plan information & schedule
+- TreeSHAP model attributions
+
+*Note: The export feature generates documents on-demand directly from the current application state and does not modify the underlying ML model, dataset, or feature contract.*
+
 
 ---
 

@@ -167,3 +167,27 @@ def test_d14_savings_goal_mathematics_cases():
     assert c8["totalSaved"] == 1_000_000.0
     assert c8["finalRemaining"] == 0.0
 
+
+def test_export_elements_in_frontend():
+    """Verify Export page elements exist in index.html, style.css, and app.js."""
+    res_index = client.get("/")
+    assert res_index.status_code == 200
+    html = res_index.text
+    assert 'data-nav-view="export"' in html
+    assert 'id="view-export"' in html
+    assert 'btn-download-pdf' in html
+    assert 'btn-download-excel' in html
+
+    res_css = client.get("/static/style.css")
+    assert res_css.status_code == 200
+    assert ".export-card" in res_css.text
+    assert ".btn-export" in res_css.text
+
+    res_js = client.get("/static/app.js")
+    assert res_js.status_code == 200
+    js = res_js.text
+    assert "initExportHandlers" in js
+    assert "downloadFile" in js
+    assert "getExportPayload" in js
+
+

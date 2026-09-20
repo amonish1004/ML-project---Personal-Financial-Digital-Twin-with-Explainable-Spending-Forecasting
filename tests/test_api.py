@@ -159,3 +159,33 @@ def test_explain_endpoint_valid():
     direct_exp = explain_prediction(SAMPLE_STATE_DICT)
     assert data["prediction"] == direct_exp["prediction"]
     assert data["base_value"] == direct_exp["base_value"]
+
+
+def test_export_pdf_endpoint_valid():
+    """Verify POST /api/export/pdf returns HTTP 200 and application/pdf content without CZK wording."""
+    payload = {
+        "baseline_state": SAMPLE_STATE_DICT,
+        "prediction": 8250.50,
+    }
+    response = client.post("/api/export/pdf", json=payload)
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert "attachment; filename=" in response.headers["content-disposition"]
+    assert response.content.startswith(b"%PDF")
+    assert b"CZK" not in response.content
+
+
+def test_export_excel_endpoint_valid():
+    """Verify POST /api/export/excel returns HTTP 200 and spreadsheet content without CZK wording."""
+    payload = {
+        "baseline_state": SAMPLE_STATE_DICT,
+        "prediction": 8250.50,
+    }
+    response = client.post("/api/export/excel", json=payload)
+    assert response.status_code == 200
+    assert "spreadsheetml.sheet" in response.headers["content-type"]
+    assert "attachment; filename=" in response.headers["content-disposition"]
+    assert len(response.content) > 500
+    assert b"CZK" not in response.content
+
+

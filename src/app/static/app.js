@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initPresets();
     initFormActionHandlers();
     initSavingsGoalSimulator();
+    initExportHandlers();
     initTooltips();
     updateFinancialSnapshot();
     updateActionPlanner();
@@ -968,7 +969,7 @@ function updateSavingsContextIfActive() {
  * View navigation (Overview / Explore / Plan / Insights / About)
  */
 function showAppView(viewName) {
-    const known = ['twin', 'explore', 'plan', 'insights', 'overview', 'about'];
+    const known = ['twin', 'explore', 'plan', 'insights', 'overview', 'export', 'about'];
     if (!known.includes(viewName)) viewName = 'twin';
 
     document.querySelectorAll('.app-view').forEach((el) => {
@@ -990,6 +991,10 @@ function showAppView(viewName) {
             el.removeAttribute('aria-current');
         }
     });
+
+    if (viewName === 'export') {
+        updateExportChecklist();
+    }
 }
 
 function initViewNavigation() {
@@ -1167,4 +1172,128 @@ function updateActionPlanner() {
         }
     }
 }
+
+/**
+ * 10. Export Feature Event Handlers & Document Downloader
+ */
+function initExportHandlers() {
+    const btnPdf = document.getElementById('btn-download-pdf');
+    const btnExcel = document.getElementById('btn-download-excel');
+
+    if (btnPdf) {
+        btnPdf.addEventListener('click', () => downloadFile('/api/export/pdf', 'financial_twin_report.pdf'));
+    }
+    if (btnExcel) {
+        btnExcel.addEventListener('click', () => downloadFile('/api/export/excel', 'financial_twin_report.xlsx'));
+    }
+}
+
+function getExportPayload() {
+    const baselineState = getFormPayload();
+    
+    let prediction = null;
+    const forecastEl = document.getElementById('forecast-value');
+    if (forecastEl && forecastEl.textContent && !['--', '...', 'Error'].includes(forecastEl.textContent)) {
+        const parsed = parseFloat(forecastEl.textContent.replace(/,/g, ''));
+        if (!isNaN(parsed)) prediction = parsed;
+    }
+
+    return {
+        baseline_state: baselineState,
+        prediction: prediction,
+        scenario_data: lastSimulationData,
+        savings_plan: lastSavingsPlanState,
+        shap_data: lastShapData
+    };
+
+}
+
+function updateExportChecklist() {
+    const iconScen = document.getElementById('icon-check-scenario');
+    const iconSav = document.getElementById('icon-check-savings');
+    const iconShap = document.getElementById('icon-check-shap');
+
+    if (iconScen) {
+        if (lastSimulationData) {
+            iconScen.textContent = '✓';
+            iconScen.className = 'check-icon pos';
+        } else {
+            iconScen.textContent = '○';
+            iconScen.className = 'check-icon';
+        }
+    }
+    if (iconSav) {
+        if (lastSavingsPlanState) {
+            iconSav.textContent = '✓';
+            iconSav.className = 'check-icon pos';
+        } else {
+            iconSav.textContent = '○';
+            iconSav.className = 'check-icon';
+        }
+    }
+    if (iconShap) {
+        if (lastShapData) {
+            iconShap.textContent = '✓';
+            iconShap.className = 'check-icon pos';
+        } else {
+            iconShap.textContent = '○';
+            iconShap.className = 'check-icon';
+        }
+    }
+}
+
+async function downloadFile(endpoint, defaultFilename) {
+    const btnPdf = document.getElementById('btn-download-pdf');
+    const btnExcel = document.getElementById('btn-download-excel');
+    
+    if (btnPdf) btnPdf.disabled = true;
+    if (btnExcel) btnExcel.disabled = true;
+
+    try {
+        const payload = getExportPayload();
+        showToast('Preparing your report download...', 'info');
+
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            let errorMsg = 'Export request failed';
+            try {
+                const errData = await response.json();
+                errorMsg = errData.detail || errorMsg;
+            } catch (e) {}
+            throw new Error(errorMsg);
+        }
+
+        const blob = await response.blob();
+
+        let filename = defaultFilename;
+        const disposition = response.headers.get('Content-Disposition');
+        if (disposition && disposition.includes('filename=')) {
+            const match = disposition.match(/filename="?([^";]+)"?/);
+            if (match && match[1]) filename = match[1];
+        }
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        showToast(`Downloaded ${filename} successfully.`, 'success');
+    } catch (err) {
+        showToast(`Export failed: ${err.message}`, 'error');
+    } finally {
+        if (btnPdf) btnPdf.disabled = false;
+        if (btnExcel) btnExcel.disabled = false;
+    }
+}
+
 

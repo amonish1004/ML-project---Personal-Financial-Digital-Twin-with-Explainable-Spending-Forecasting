@@ -44,12 +44,14 @@
                     <button type="button" class="nav-link" data-nav-view="plan">Plan</button>
                     <button type="button" class="nav-link" data-nav-view="insights">Insights</button>
                     <button type="button" class="nav-link" data-nav-view="overview">Overview</button>
+                    <button type="button" class="nav-link" data-nav-view="export">Export</button>
                     <button type="button" class="nav-link nav-link-secondary" data-nav-view="about">About &amp; Methodology</button>
                 </nav>
             </div>
         </header>
 
         <main class="app-main">
+
 
             <!-- TWIN (PRIMARY DIGITAL TWIN WORKSPACE) -->
             <section id="view-twin" class="app-view is-active" data-view="twin" aria-labelledby="twin-heading">
@@ -491,8 +493,87 @@
                 </section>
             </section>
 
+            <!-- EXPORT -->
+            <section id="view-export" class="app-view" data-view="export" aria-labelledby="export-heading" hidden>
+                <header class="view-intro">
+                    <h2 id="export-heading" class="view-title">Export</h2>
+                    <p class="view-lede">Download your current financial position, spending forecasts, scenario simulations, savings goal schedules, and TreeSHAP feature attributions in PDF or Excel format.</p>
+                </header>
+
+                <div class="export-grid">
+                    <section class="dashboard-card export-card">
+                        <div class="card-header">
+                            <h2>Download Financial Reports</h2>
+                            <span class="badge badge-info">Document Generation</span>
+                        </div>
+
+                        <p class="section-description">
+                            Export your complete financial digital twin session. Reports include your current inputs, calculated features, model spending forecasts, and any active What-If scenarios, savings goal schedules, or TreeSHAP explanations.
+                        </p>
+
+                        <div class="export-options">
+                            <div class="export-option-card">
+                                <div class="export-option-header">
+                                    <div class="export-icon pdf-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 2 0 0 0-2 2v16a2 2 2 0 0 0 2 2h12a2 2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div class="export-option-title">
+                                        <h3>PDF Financial Report</h3>
+                                        <span class="format-badge">.pdf</span>
+                                    </div>
+                                </div>
+                                <p class="export-option-desc">Comprehensive, publication-ready PDF document formatted with clear section tables, forecast cards, and methodology disclaimers.</p>
+                                <button type="button" class="btn btn-primary btn-export" id="btn-download-pdf">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    Download PDF Report
+                                </button>
+                            </div>
+
+                            <div class="export-option-card">
+                                <div class="export-option-header">
+                                    <div class="export-icon excel-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 2 0 0 0-2 2v16a2 2 2 0 0 0 2 2h12a2 2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <rect x="8" y="12" width="8" height="6" rx="1"></rect>
+                                        </svg>
+                                    </div>
+                                    <div class="export-option-title">
+                                        <h3>Excel Data Workbook</h3>
+                                        <span class="format-badge">.xlsx</span>
+                                    </div>
+                                </div>
+                                <p class="export-option-desc">Multi-worksheet Excel workbook containing structured data sheets for Executive Summary, Inputs, Scenario Comparisons, Savings Schedule, and SHAP Attributions.</p>
+                                <button type="button" class="btn btn-primary btn-export" id="btn-download-excel">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    Download Excel Workbook
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="export-preview-box">
+                            <h3 class="section-label">Included in Your Export Package</h3>
+                            <div class="export-check-grid">
+                                <div class="check-item"><span class="check-icon pos">✓</span> Current Financial Position Inputs &amp; Derived Features</div>
+                                <div class="check-item"><span class="check-icon pos">✓</span> Next-Month Spending Forecast Point Estimate</div>
+                                <div class="check-item" id="export-check-scenario"><span class="check-icon" id="icon-check-scenario">○</span> What-If Scenario Comparison (Run in Explore)</div>
+                                <div class="check-item" id="export-check-savings"><span class="check-icon" id="icon-check-savings">○</span> Savings Target Plan &amp; Schedule (Run in Plan)</div>
+                                <div class="check-item" id="export-check-shap"><span class="check-icon" id="icon-check-shap">○</span> TreeSHAP Model Attributions (Generated in Insights)</div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </section>
+
             <!-- ABOUT & METHODOLOGY -->
             <section id="view-about" class="app-view" data-view="about" aria-labelledby="about-heading" hidden>
+
                 <header class="view-intro">
                     <h2 id="about-heading" class="view-title">About &amp; Methodology</h2>
                     <p class="view-lede">Technical architecture, 14-feature contract specifications, derived calculations, and explanation methodology.</p>

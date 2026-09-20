@@ -1471,3 +1471,128 @@ summary:focus-visible {
         -webkit-overflow-scrolling: touch;
     }
 }
+
+/* Export Page Styles */
+.export-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.export-card {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.export-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 8px;
+}
+
+.export-option-card {
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+    transition: border-color var(--duration-fast), transform var(--duration-fast);
+}
+
+.export-option-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+}
+
+.export-option-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.export-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.pdf-icon {
+    background: rgba(239, 68, 68, 0.12);
+    color: #EF4444;
+}
+
+.excel-icon {
+    background: rgba(16, 185, 129, 0.12);
+    color: #10B981;
+}
+
+.export-option-title h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 2px 0;
+    color: var(--text-primary);
+}
+
+.format-badge {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+}
+
+.export-option-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.btn-export {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.export-preview-box {
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    margin-top: 10px;
+}
+
+.export-check-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.check-item {
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.check-icon {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.check-icon.pos {
+    color: var(--color-success);
+}
+

@@ -14,8 +14,9 @@ Architectural Contract:
 
 import sys
 from pathlib import Path
+from datetime import datetime
 from typing import Dict, Any, Union, Optional
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, status, Response
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, ConfigDict
@@ -38,6 +39,7 @@ from src.app.simulator import (
     DERIVED_FEATURES,
 )
 from src.app.explainer import explain_prediction
+from src.app.export import generate_pdf_report, generate_excel_report
 
 # Instantiate FastAPI Application
 app = FastAPI(
@@ -98,6 +100,19 @@ class SimulateRequest(BaseModel):
 
     baseline_state: FinancialStateRequest = Field(..., description="Baseline financial state profile")
     scenario_changes: Dict[str, Any] = Field(..., description="Dictionary of primary input overrides")
+
+
+class ExportReportRequest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    baseline_state: FinancialStateRequest = Field(..., description="Baseline financial state profile")
+    prediction: Optional[float] = Field(None, description="Current spending forecast")
+    currency: Optional[str] = Field(None, description="Optional currency designation")
+    scenario_data: Optional[Dict[str, Any]] = Field(None, description="What-If scenario simulation results")
+    savings_plan: Optional[Dict[str, Any]] = Field(None, description="Savings goal plan and schedule")
+    shap_data: Optional[Dict[str, Any]] = Field(None, description="TreeSHAP explanation results")
+    action_planner: Optional[Dict[str, Any]] = Field(None, description="Financial Action Planner details")
+
 
 
 # Endpoints
@@ -171,3 +186,35 @@ def explain_endpoint(request: FinancialStateRequest):
     state_dict = request.model_dump()
     explanation_result = explain_prediction(state_dict)
     return explanation_result
+
+
+@app.post("/api/export/pdf", summary="Export Financial Twin Report to PDF")
+def export_pdf_endpoint(request: ExportReportRequest):
+    """
+    Accepts current application state and returns formatted PDF report.
+    """
+    export_dict = request.model_dump()
+    pdf_bytes = generate_pdf_report(export_dict)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"financial_twin_report_{timestamp}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@app.post("/api/export/excel", summary="Export Financial Twin Data to Excel (.xlsx)")
+def export_excel_endpoint(request: ExportReportRequest):
+    """
+    Accepts current application state and returns multi-worksheet Excel workbook.
+    """
+    export_dict = request.model_dump()
+    excel_bytes = generate_excel_report(export_dict)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"financial_twin_report_{timestamp}.xlsx"
+    return Response(
+        content=excel_bytes,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
