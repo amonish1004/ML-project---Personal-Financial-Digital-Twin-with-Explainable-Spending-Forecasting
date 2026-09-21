@@ -14,3 +14,5 @@ data/processed/*.parquet
 
 # Trained model binaries
 models/*.joblib
+# Experiment model artifacts
+models/experiments/*.joblib
