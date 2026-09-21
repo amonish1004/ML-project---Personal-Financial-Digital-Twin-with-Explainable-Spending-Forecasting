@@ -97,7 +97,9 @@ The production model uses the **CatBoostRegressor** algorithm serialized at [`mo
 - **Algorithm:** `CatBoostRegressor`
 - **Iterations:** `300`
 - **Learning Rate:** `0.05`
-- **Tree Depth:** `6`
+- **Tree Depth:** `8`
+- **L2 Leaf Regularization:** `5`
+- **Random Strength:** `1.0`
 - **Random Seed:** `42`
 - **Loss Function:** `'RMSE'`
 
@@ -138,17 +140,32 @@ During model candidate selection, algorithms were trained on **Train** and evalu
 | **Ridge Regression (Scaled)** | 763.99 | 1323.34 | 0.4827 | 444.28 | Linear Candidate |
 | **Candidate CatBoost (Train-only)** | **679.11** | **1256.17** | **0.5339** | **348.89** | **SELECTED CHAMPION** |
 
+### Model Optimization Experiments
+After initial model selection, four controlled experiments were conducted on the **2017 Validation set** to optimize the CatBoost champion. All experiments were isolated, reproducible, and the 2018 Test set remained untouched during model selection.
+
+| Experiment | Configuration | Val R² | Val MAE (CZK) | Outcome |
+| :--- | :--- | ---: | ---: | :--- |
+| **Baseline** | depth=6, l2_leaf_reg=3 | 0.5339 | 679.11 | Original reference |
+| **Exp 1: Early Stopping** | 1500 iter, lr=0.03, best_iter≈460 | 0.5341 | 679.48 | Negligible improvement |
+| **Exp 2: Hyperparameter Grid** | depth=8, l2_leaf_reg=5 | **0.5357** | **673.58** | **Promoted** |
+| **Exp 3: Boosting Schedule** | depth=8, l2_leaf_reg=5, lr=0.03 | 0.5360 | 676.20 | Marginal over Exp 2 |
+| **Exp 4: log1p Target** | log1p(y) transform | 0.4917 | 652.13 | R²/RMSE worsened; not adopted |
+
+The Experiment 2 configuration (`depth=8`, `l2_leaf_reg=5`, `random_strength=1.0`) was selected as the final champion based on consistent validation improvement across all metrics. The log1p target transformation was not adopted because it substantially worsened R² (−0.044) and RMSE (+58) despite improving MAE and MedAE.
+
 ### Authoritative Final Held-Out Test Evaluation (2018 Test Partition)
-After selecting CatBoost, the model was retrained on combined **Train + Validation** data (117,804 rows) and evaluated **once** on the held-out **2018 Test Partition (53,390 rows)**:
+The optimized champion was retrained on combined **Train + Validation** data (117,804 rows) and evaluated **once** on the held-out **2018 Test Partition (53,390 rows)**:
 
-| Dataset / Retraining Strategy | Rows | MAE (CZK) | RMSE (CZK) | R² | MedAE (CZK) |
-| :--- | ---: | ---: | ---: | ---: | ---: |
-| **Train** | 71,824 | 592.69 | 1151.58 | 0.5857 | 290.83 |
-| **Validation** | 45,980 | 654.68 | 1211.18 | 0.5667 | 332.09 |
-| **Train + Validation** | 117,804 | 616.88 | 1175.20 | 0.5781 | 306.62 |
-| **Final Champion CatBoost (Held-Out Test)** | **53,390** | **729.88** | **1321.27** | **0.4954** | **377.17** |
+| Metric | Previous Production | Final Champion | Change |
+| :--- | ---: | ---: | ---: |
+| **MAE (CZK)** | 729.88 | **725.28** | −4.60 |
+| **RMSE (CZK)** | 1321.27 | **1319.25** | −2.02 |
+| **R²** | 0.4954 | **0.4969** | +0.0015 |
+| **MedAE (CZK)** | 377.17 | **369.89** | −7.28 |
+| **Within ±500 CZK** | 59.55% | **60.08%** | +0.53pp |
+| **Within ±1000 CZK** | 79.77% | **80.01%** | +0.24pp |
 
-- **Supplementary Error Tolerances:** **59.55%** of test forecasts fall within $\pm 500\text{ CZK}$, and **79.77%** fall within $\pm 1000\text{ CZK}$ of actual spending.
+All six metrics improved modestly on the held-out 2018 test set. The improvement is consistent but small, reflecting that model performance is near saturation with the current 14-feature contract.
 
 For detailed evaluation methodology, leakage audit findings, and metric interpretations, see [`reports/model_evaluation.md`](reports/model_evaluation.md).
 
@@ -223,7 +240,7 @@ The project includes an automated test suite verifying all system layers:
 .\.venv\Scripts\python.exe -m pytest
 ```
 
-**Test Status:** **`60 passed, 5 warnings in 3.23s`**
+**Test Status:** **`68 passed, 5 warnings`**
 
 | Test Module | Coverage Area | Status |
 | :--- | :--- | :---: |
@@ -234,6 +251,7 @@ The project includes an automated test suite verifying all system layers:
 | [`tests/test_frontend.py`](tests/test_frontend.py) | Static asset serving (`index.html`, `style.css`, `app.js`) and UI routing | ✅ **3/3 Passed** |
 | [`tests/test_integration.py`](tests/test_integration.py) | Integrated workflow, counterfactual visualizer API parity, derived overrides | ✅ **4/4 Passed** |
 | [`tests/test_e2e_system.py`](tests/test_e2e_system.py) | End-to-end system validation, boundary conditions, mathematical fidelity | ✅ **8/8 Passed** |
+| [`tests/test_export.py`](tests/test_export.py) | PDF and Excel export generation, currency-neutral output | ✅ **8/8 Passed** |
 
 For the full system testing report, see [`reports/dimension13_end_to_end_testing.md`](reports/dimension13_end_to_end_testing.md).
 
@@ -294,14 +312,15 @@ Personal Financial Digital Twin/
 │   │   │   └── app.js                    <-- Client Application Script
 │   │   └── api/                          <-- REST API Package
 │   │       └── server.py                 <-- FastAPI Server Implementation
-├── tests/                                <-- Complete System Test Suite (60/60 Passed)
+├── tests/                                <-- Complete System Test Suite (68/68 Passed)
 │   ├── test_api.py
 │   ├── test_e2e_system.py
 │   ├── test_explainer.py
 │   ├── test_frontend.py
 │   ├── test_inference.py
 │   ├── test_integration.py
-│   └── test_simulator.py
+│   ├── test_simulator.py
+│   └── test_export.py
 └── reports/                              <-- Technical & Evaluation Reports
     ├── dimension1_dataset_validation.md
     ├── dimension2_preprocessing_and_eda.md
@@ -334,7 +353,7 @@ Personal Financial Digital Twin/
 
 - **Model Forecast Estimates:** Forecasts are statistical model estimates based on historical transaction behavior, not deterministic guarantees or financial advice.
 - **Historical Data Scope:** The model is trained and evaluated on historical PKDD '99 / Berka Czech banking records.
-- **Upper-Tail Spending Volatility:** Large non-recurring expenditure spikes create higher RMSE relative to MedAE ($1321.27\text{ CZK}$ vs. $377.17\text{ CZK}$).
+- **Upper-Tail Spending Volatility:** Large non-recurring expenditure spikes create higher RMSE relative to MedAE ($1319.25\text{ CZK}$ vs. $369.89\text{ CZK}$).
 - **Academic Project Boundary:** Designed as an academic machine learning research and application engineering system.
 
 ---

@@ -1,0 +1,114 @@
+{
+  "experiment": "Champion Promotion \u2014 Experiment 2 Winner",
+  "champion_params": {
+    "iterations": 300,
+    "learning_rate": 0.05,
+    "depth": 8,
+    "l2_leaf_reg": 5,
+    "random_strength": 1.0,
+    "random_seed": 42,
+    "loss_function": "RMSE",
+    "verbose": 0
+  },
+  "original_params": {
+    "iterations": 300,
+    "learning_rate": 0.05,
+    "depth": 6,
+    "l2_leaf_reg": 3,
+    "random_strength": 1.0,
+    "random_seed": 42,
+    "loss_function": "RMSE",
+    "verbose": 0
+  },
+  "training_set": "Train + Validation (2013-04 to 2017-12, 117,804 samples)",
+  "test_set": "2018 (53,390 samples)",
+  "validation_reproduction": {
+    "MAE": 673.5788,
+    "RMSE": 1253.7555,
+    "R2": 0.5357,
+    "MedAE": 342.2289
+  },
+  "final_2018_test_metrics": {
+    "MAE": 725.2814,
+    "RMSE": 1319.2455,
+    "R2": 0.4969,
+    "MedAE": 369.8861
+  },
+  "final_2018_error_distribution": {
+    "mean_residual": 56.8819,
+    "std_residual": 1318.0187,
+    "pct_within_100": 15.17,
+    "pct_within_250": 37.57,
+    "pct_within_500": 60.08,
+    "pct_within_1000": 80.01
+  },
+  "final_2018_segmented_metrics": {
+    "thresholds": {
+      "T1_33pct_CZK": 620.0,
+      "T2_67pct_CZK": 1753.96
+    },
+    "low_spending": {
+      "MAE": 376.1141,
+      "RMSE": 654.7939,
+      "R2": -14.9102,
+      "MedAE": 211.9574
+    },
+    "medium_spending": {
+      "MAE": 580.5785,
+      "RMSE": 886.1377,
+      "R2": -6.2171,
+      "MedAE": 389.9699
+    },
+    "high_spending": {
+      "MAE": 1242.7074,
+      "RMSE": 2028.7948,
+      "R2": 0.1735,
+      "MedAE": 707.9048
+    }
+  },
+  "original_2018_test_metrics": {
+    "MAE": 729.88,
+    "RMSE": 1321.27,
+    "R2": 0.4954,
+    "MedAE": 377.17,
+    "pct_within_500": 59.55,
+    "pct_within_1000": 79.77
+  },
+  "comparison": {
+    "MAE": {
+      "original": 729.88,
+      "champion": 725.2814,
+      "delta": -4.5986
+    },
+    "RMSE": {
+      "original": 1321.27,
+      "champion": 1319.2455,
+      "delta": -2.0245
+    },
+    "R\u00b2": {
+      "original": 0.4954,
+      "champion": 0.4969,
+      "delta": 0.0015
+    },
+    "MedAE": {
+      "original": 377.17,
+      "champion": 369.8861,
+      "delta": -7.2839
+    },
+    "Within \u00b1500": {
+      "original": 59.55,
+      "champion": 60.08,
+      "delta": 0.53
+    },
+    "Within \u00b11000": {
+      "original": 79.77,
+      "champion": 80.01,
+      "delta": 0.24
+    }
+  },
+  "production_artifact": "D:\\College UG\\3rd year\\5TH SEM\\Machine Learning\\ML project\\Personal Financial Digital Twin\\models\\catboost_model.joblib",
+  "post_save_verification": "PASSED",
+  "log1p_used": false,
+  "early_stopping_used": false,
+  "test_data_used_for_tuning": false
+}

@@ -29,7 +29,9 @@ The forecasting model utilizes the **CatBoostRegressor** algorithm with frozen h
 - **Algorithm:** `CatBoostRegressor`
 - **Iterations:** `300`
 - **Learning Rate:** `0.05`
-- **Tree Depth:** `6`
+- **Tree Depth:** `8`
+- **L2 Leaf Regularization:** `5`
+- **Random Strength:** `1.0`
 - **Random Seed:** `42`
 - **Loss Function:** `'RMSE'`
 - **Serialized Artifact:** [`models/catboost_model.joblib`](models/catboost_model.joblib)
@@ -104,15 +106,16 @@ The frozen champion CatBoost model ([`models/catboost_model.joblib`](models/catb
 | **Train** | 71,824 | 592.69 | 1151.58 | 0.5857 | 290.83 |
 | **Validation** | 45,980 | 654.68 | 1211.18 | 0.5667 | 332.09 |
 | **Train + Validation** | 117,804 | 616.88 | 1175.20 | 0.5781 | 306.62 |
-| **Test (Held-Out)** | 53,390 | 729.88 | 1321.27 | 0.4954 | 377.17 |
+| **Test (Held-Out, Previous Production)** | 53,390 | 729.88 | 1321.27 | 0.4954 | 377.17 |
+| **Test (Held-Out, Final Champion)** | **53,390** | **725.28** | **1319.25** | **0.4969** | **369.89** |
 
 ### Authoritative Final Held-Out Evaluation (2018 Test Set)
-The **2018 Test partition (53,390 rows)** serves as the primary held-out benchmark for reporting final model performance:
+The **2018 Test partition (53,390 rows)** serves as the primary held-out benchmark for reporting final model performance. After model optimization experiments on the 2017 Validation set, the selected champion configuration (`depth=8`, `l2_leaf_reg=5`, `random_strength=1.0`) was retrained on Train + Validation and evaluated once on the 2018 Test set:
 
-- **MAE:** $729.88\text{ CZK}$
-- **RMSE:** $1321.27\text{ CZK}$
-- **$R^2$:** $0.4954$
-- **MedAE:** $377.17\text{ CZK}$
+- **MAE:** $725.28\text{ CZK}$
+- **RMSE:** $1319.25\text{ CZK}$
+- **$R^2$:** $0.4969$
+- **MedAE:** $369.89\text{ CZK}$
 
 ---
 
@@ -128,8 +131,9 @@ During the model development phase (Dimension 3 & 4), candidate algorithms were 
 
 ### Retraining & Final Test Evaluation Protocol
 1. **Model Selection:** CatBoost was selected as the champion architecture based strictly on Validation $R^2$ ($0.5339$ vs Ridge $0.4827$ vs Persistence $0.0215$).
-2. **Retraining:** To utilize all available pre-2018 historical data, the selected CatBoost architecture was retrained on combined **Train + Validation** data (117,804 rows, `2013-04` to `2017-12`).
-3. **Final Held-Out Test Evaluation:** The retrained model ([`models/catboost_model.joblib`](models/catboost_model.joblib)) was evaluated **once** on the 2018 Test partition. The 2018 Test set was strictly held out and never used for hyperparameter tuning or model selection.
+2. **Model Optimization:** Four controlled experiments were conducted on the 2017 Validation set to optimize hyperparameters. The final champion configuration (`depth=8`, `l2_leaf_reg=5`, `random_strength=1.0`) was selected based on consistent validation improvement (Val $R^2 = 0.5357$, Val MAE $= 673.58$).
+3. **Retraining:** The optimized champion was retrained on combined **Train + Validation** data (117,804 rows, `2013-04` to `2017-12`).
+4. **Final Held-Out Test Evaluation:** The retrained model ([`models/catboost_model.joblib`](models/catboost_model.joblib)) was evaluated **once** on the 2018 Test partition. The 2018 Test set was strictly held out and never used for hyperparameter tuning or model selection.
 
 ---
 
@@ -137,13 +141,13 @@ During the model development phase (Dimension 3 & 4), candidate algorithms were 
 
 The final held-out test evaluation metrics provide clear insights into the predictive behavior of the model:
 
-- **Mean Absolute Error ($\text{MAE} = 729.88\text{ CZK}$):** On average, the model's predicted monthly expenditure deviates from actual outgoing spending by approximately 730 CZK.
-- **Median Absolute Error ($\text{MedAE} = 377.17\text{ CZK}$):** For 50% of account-months in the held-out test set, the absolute prediction error is $377.17\text{ CZK}$ or less. The fact that MedAE is substantially lower than MAE indicates that typical errors are small, while a minority of accounts with high spending variance pull up the average error.
-- **Root Mean Squared Error ($\text{RMSE} = 1321.27\text{ CZK}$):** The gap between RMSE ($1321.27\text{ CZK}$) and MAE ($729.88\text{ CZK}$) reflects the presence of upper-tail spending spikes (such as large one-off loan payments or major purchases), which incur larger squared penalties.
-- **Coefficient of Determination ($R^2 = 0.4954$):** The model accounts for approximately **49.54% of the variance** in next-month total spending across the 2018 test set relative to a naive mean forecast.
+- **Mean Absolute Error ($\text{MAE} = 725.28\text{ CZK}$):** On average, the model's predicted monthly expenditure deviates from actual outgoing spending by approximately 725 CZK.
+- **Median Absolute Error ($\text{MedAE} = 369.89\text{ CZK}$):** For 50% of account-months in the held-out test set, the absolute prediction error is $369.89\text{ CZK}$ or less. The fact that MedAE is substantially lower than MAE indicates that typical errors are small, while a minority of accounts with high spending variance pull up the average error.
+- **Root Mean Squared Error ($\text{RMSE} = 1319.25\text{ CZK}$):** The gap between RMSE ($1319.25\text{ CZK}$) and MAE ($725.28\text{ CZK}$) reflects the presence of upper-tail spending spikes (such as large one-off loan payments or major purchases), which incur larger squared penalties.
+- **Coefficient of Determination ($R^2 = 0.4969$):** The model accounts for approximately **49.69% of the variance** in next-month total spending across the 2018 test set relative to a naive mean forecast.
 
 ### Critical Interpretive Guardrails
-- **Not "50% Accuracy":** $R^2 = 0.4954$ indicates variance explained relative to a mean baseline, not a classification accuracy percentage.
+- **Not "50% Accuracy":** $R^2 = 0.4969$ indicates variance explained relative to a mean baseline, not a classification accuracy percentage.
 - **No Absolute Guarantees:** Predictions represent statistical expected values under historical behavioral patterns, not guaranteed future financial outcomes.
 - **Regression vs. Classification:** Model evaluation must be interpreted using CZK error magnitudes and variance metrics.
 
@@ -153,8 +157,8 @@ The final held-out test evaluation metrics provide clear insights into the predi
 
 To provide operational context for practical financial tracking, error tolerances were evaluated on the 53,390 held-out test predictions:
 
-- **Within $\pm 500\text{ CZK}$ Tolerance:** **59.55%** of test predictions ($31,795 / 53,390$).
-- **Within $\pm 1000\text{ CZK}$ Tolerance:** **79.77%** of test predictions ($42,589 / 53,390$).
+- **Within $\pm 500\text{ CZK}$ Tolerance:** **60.08%** of test predictions.
+- **Within $\pm 1000\text{ CZK}$ Tolerance:** **80.01%** of test predictions.
 
 *Note: These tolerance figures are supplementary diagnostic bounds indicating the proportion of forecasts falling within fixed monetary bands. They are not classification accuracy rates.*
 
@@ -178,7 +182,7 @@ A comprehensive model evaluation audit was conducted to verify the mathematical 
 When reviewing model evaluation results, the following technical and domain limitations should be considered:
 
 - **Spending Volatility and Tail Risk:** Individual consumer spending exhibits natural stochastic variability. Large non-recurring financial events (e.g., annual insurance premiums or vehicle purchases) are difficult to anticipate from 3-month rolling aggregates alone.
-- **Unexplained Variance:** An $R^2$ of approximately $0.4954$ reflects inherent unexplained variance in personal financial behavior.
+- **Unexplained Variance:** An $R^2$ of approximately $0.4969$ reflects inherent unexplained variance in personal financial behavior.
 - **Historical Data Context:** The model is trained and evaluated on historical PKDD '99 / Berka Czech banking records. Macroeconomic shifts, inflation, or changing banking regulations could alter baseline spending patterns.
 - **Observational Nature:** Predictions reflect statistical correlations observed in historical transaction logs and should not be interpreted as financial advice or guarantees.
 
@@ -189,10 +193,10 @@ When reviewing model evaluation results, the following technical and domain limi
 The final evaluation audit confirms that the serialized CatBoost champion model ([`models/catboost_model.joblib`](models/catboost_model.joblib)) delivers solid, reproducible performance for next-month spending forecasting. 
 
 Evaluated on the held-out **2018 Test partition (53,390 rows)**, the model achieves:
-- **MAE:** $729.88\text{ CZK}$
-- **RMSE:** $1321.27\text{ CZK}$
-- **$R^2$:** $0.4954$
-- **MedAE:** $377.17\text{ CZK}$
-- **Tolerance Bounds:** $59.55\%$ within $\pm 500\text{ CZK}$, $79.77\%$ within $\pm 1000\text{ CZK}$
+- **MAE:** $725.28\text{ CZK}$
+- **RMSE:** $1319.25\text{ CZK}$
+- **$R^2$:** $0.4969$
+- **MedAE:** $369.89\text{ CZK}$
+- **Tolerance Bounds:** $60.08\%$ within $\pm 500\text{ CZK}$, $80.01\%$ within $\pm 1000\text{ CZK}$
 
 The model outperforms both naive persistence and linear regression baselines across out-of-time evaluation partitions, providing a reliable quantitative backbone for the Personal Financial Digital Twin application layer.

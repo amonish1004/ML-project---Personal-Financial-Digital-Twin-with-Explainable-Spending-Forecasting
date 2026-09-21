@@ -1,0 +1,56 @@
+{
+  "experiment": "Experiment 4 \u2014 log1p Target Transformation",
+  "model_params": {
+    "iterations": 300,
+    "learning_rate": 0.05,
+    "depth": 8,
+    "l2_leaf_reg": 5,
+    "random_strength": 1.0,
+    "random_seed": 42,
+    "loss_function": "RMSE",
+    "verbose": 0
+  },
+  "original_target": {
+    "metrics": {
+      "MAE": 673.5788,
+      "RMSE": 1253.7555,
+      "R2": 0.5357,
+      "MedAE": 342.2289
+    },
+    "prediction_summary": {
+      "count": 45980,
+      "min": -21.665807451290675,
+      "max": 9713.62079723641,
+      "mean": 1654.488582980021,
+      "median": 1316.9896746136064
+    }
+  },
+  "log1p_target": {
+    "metrics": {
+      "MAE": 652.1299,
+      "RMSE": 1311.7987,
+      "R2": 0.4917,
+      "MedAE": 293.8369
+    },
+    "prediction_summary": {
+      "count": 45980,
+      "min": 0.0,
+      "max": 7480.427891407984,
+      "mean": 1405.9565950156557,
+      "median": 1088.4869757655852
+    },
+    "negative_predictions_before_clip": 65,
+    "min_raw_inverse_prediction": -0.2261559295195986,
+    "clipping_applied": true
+  },
+  "deltas": {
+    "R2": -0.044,
+    "MAE": -21.4489,
+    "RMSE": 58.0432,
+    "MedAE": -48.392
+  },
+  "assessment": "Mixed / Trade-off",
+  "leakage_check": "ALL PASSED",
+  "test_2018_evaluated": false,
+  "production_model_modified": false
+}
