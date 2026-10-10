@@ -12,7 +12,9 @@ data/raw/berka/*.tsv
 data/processed/*.csv
 data/processed/*.parquet
 
-# Trained model binaries
+# Trained model binaries (exclude by default)
 models/*.joblib
+# But TRACK the production model needed for deployment
+!models/catboost_model.joblib
 # Experiment model artifacts
 models/experiments/*.joblib
